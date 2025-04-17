@@ -10,7 +10,7 @@ export default function JobListingsOverview() {
   const [, setLocation] = useLocation();
 
   // Fetch job listings
-  const { data: jobListings, isLoading: jobsLoading } = useQuery({
+  const { data: jobListings = [], isLoading: jobsLoading } = useQuery<any[]>({
     queryKey: ['/api/jobs'],
   });
 

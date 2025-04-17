@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, Clock, Users, Award } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 interface MetricCardProps {
   title: string;
@@ -61,8 +62,10 @@ export function MetricCard({
 }
 
 export default function OverviewMetrics() {
+  const [, setLocation] = useLocation();
+
   // Fetch dashboard metrics
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics = {}, isLoading } = useQuery<any>({
     queryKey: ['/api/dashboard/metrics'],
   });
 
@@ -88,12 +91,12 @@ export default function OverviewMetrics() {
         description="scheduled interviews"
         icon={<Clock className="h-5 w-5 text-blue-600" />}
         actionLabel="View Calendar"
-        onAction={() => window.location.href = "/calendar"}
+        onAction={() => setLocation("/calendar")}
       />
 
       <MetricCard
         title="Applicants to Review"
-        value={metrics?.waitlistCount || 0}
+        value={(metrics as any)?.waitlistCount || 0}
         description="to stay on track"
         icon={<Users className="h-5 w-5 text-primary-600" />}
         trend={{ value: 12, positive: false }}
@@ -105,7 +108,7 @@ export default function OverviewMetrics() {
         description="pending responses"
         icon={<Clock className="h-5 w-5 text-amber-600" />}
         actionLabel="Send Now"
-        onAction={() => window.location.href = "/emails"}
+        onAction={() => setLocation("/emails")}
       />
     </div>
   );
