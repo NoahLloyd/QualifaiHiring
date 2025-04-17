@@ -171,16 +171,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Ensure all applicants have jobListingId
-      const applicantsWithJobId = applicants.map(applicant => {
+      const applicantsWithJobId = await Promise.all(applicants.map(async applicant => {
         if (applicant.jobListingId === undefined) {
           console.log(`Fixing applicant ${applicant.id} with missing jobListingId`);
-          return {
+          // Update the applicant in storage too
+          const updatedApplicant = {
             ...applicant,
             jobListingId: 1 // Default to job 1 if missing
           };
+          
+          // Update the storage
+          await storage.updateApplicantJob(applicant.id, 1);
+          
+          return updatedApplicant;
         }
         return applicant;
-      });
+      }));
       
       res.json(applicantsWithJobId);
     } catch (error) {

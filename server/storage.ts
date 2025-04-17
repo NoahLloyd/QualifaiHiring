@@ -35,6 +35,7 @@ export interface IStorage {
   createApplicant(applicant: InsertApplicant): Promise<Applicant>;
   updateApplicantStatus(id: number, status: string): Promise<boolean>;
   updateApplicantMatchScore(id: number, matchScore: number): Promise<boolean>;
+  updateApplicantJob(id: number, jobId: number): Promise<boolean>;
   countApplicants(): Promise<number>;
   countApplicantsByMatchScore(minScore: number): Promise<number>;
   countApplicantsByStatus(status: string): Promise<number>;
@@ -424,11 +425,31 @@ export class MemStorage implements IStorage {
   
   // Job listing methods
   async getJobListing(id: number): Promise<JobListing | undefined> {
-    return this.jobListings.get(id);
+    const job = this.jobListings.get(id);
+    if (job) {
+      // Count applicants for this job
+      const applicantsCount = await this.countApplicantsByJobId(id);
+      return {
+        ...job,
+        applicantsCount
+      };
+    }
+    return job;
   }
   
   async getAllJobListings(): Promise<JobListing[]> {
-    return Array.from(this.jobListings.values());
+    const jobs = Array.from(this.jobListings.values());
+    
+    // Add applicant counts to each job
+    const jobsWithCounts = await Promise.all(jobs.map(async (job) => {
+      const applicantsCount = await this.countApplicantsByJobId(job.id);
+      return {
+        ...job,
+        applicantsCount
+      };
+    }));
+    
+    return jobsWithCounts;
   }
   
   async createJobListing(jobListingData: InsertJobListing): Promise<JobListing> {
@@ -527,6 +548,18 @@ export class MemStorage implements IStorage {
     }
     
     applicant.matchScore = matchScore;
+    this.applicants.set(id, applicant);
+    return true;
+  }
+  
+  async updateApplicantJob(id: number, jobId: number): Promise<boolean> {
+    const applicant = this.applicants.get(id);
+    
+    if (!applicant) {
+      return false;
+    }
+    
+    applicant.jobListingId = jobId;
     this.applicants.set(id, applicant);
     return true;
   }
