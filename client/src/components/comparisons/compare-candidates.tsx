@@ -46,6 +46,7 @@ export default function CompareCandidates({ jobId, initialCandidates = [] }: Com
   const { data: candidateDetails, refetch: refetchCandidateDetails } = useQuery({
     queryKey: [`/api/applicants/details?ids=${selectedCandidates.join(',')}`],
     enabled: selectedCandidates.length > 0,
+    initialData: [],
   });
 
   // Trigger fetch when selected candidates change

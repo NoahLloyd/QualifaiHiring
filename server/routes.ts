@@ -194,12 +194,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const idsParam = req.query.ids;
       
       if (!idsParam) {
-        return res.status(400).json({ message: "Applicant IDs are required" });
+        return res.status(400).json({ message: "Applicant IDs are required (use ?ids=1,2,3)" });
       }
       
-      const ids = Array.isArray(idsParam) 
-        ? idsParam.map(id => parseInt(id as string)) 
-        : [parseInt(idsParam as string)];
+      // Handle different formats of IDs:
+      // 1. Single ID (ids=123)
+      // 2. Array of IDs from query (?ids=1&ids=2&ids=3)
+      // 3. Comma-separated IDs (?ids=1,2,3)
+      let ids: number[] = [];
+      
+      if (Array.isArray(idsParam)) {
+        // Handle array format from query params
+        ids = idsParam.map(id => parseInt(id as string)).filter(id => !isNaN(id));
+      } else if ((idsParam as string).includes(',')) {
+        // Handle comma-separated string
+        ids = (idsParam as string).split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      } else {
+        // Handle single ID
+        const parsedId = parseInt(idsParam as string);
+        if (!isNaN(parsedId)) {
+          ids = [parsedId];
+        }
+      }
+      
+      if (ids.length === 0) {
+        return res.status(400).json({ message: "No valid applicant IDs provided" });
+      }
+      
+      console.log("Fetching details for applicants:", ids);
       
       const applicants = await storage.getApplicantsByIds(ids);
       
