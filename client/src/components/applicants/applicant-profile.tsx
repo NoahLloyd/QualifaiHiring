@@ -14,6 +14,7 @@ import {
   ThumbsUp, ThumbsDown, Clock, FileText, Send
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { generateApplicantAnalysis } from "@/lib/openai";
 import { useState } from "react";
 
 interface ApplicantProfileProps {
@@ -81,6 +82,28 @@ export default function ApplicantProfile({ id }: ApplicantProfileProps) {
       toast({
         title: "Error",
         description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Generate AI analysis mutation
+  const generateAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      return await generateApplicantAnalysis(id);
+    },
+    onSuccess: () => {
+      toast({
+        title: "AI Analysis Generated",
+        description: "AI analysis has been successfully generated for this applicant.",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/applicants/${id}/ai-analysis`] });
+    },
+    onError: (error) => {
+      console.error("Analysis generation error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate AI analysis. Please try again.",
         variant: "destructive",
       });
     },
@@ -354,8 +377,20 @@ export default function ApplicantProfile({ id }: ApplicantProfileProps) {
           ) : (
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-center py-8">
+                <div className="flex flex-col items-center justify-center py-8 space-y-4">
                   <p className="text-neutral-500">No AI analysis available for this applicant.</p>
+                  <Button 
+                    variant="secondary"
+                    onClick={() => generateAnalysisMutation.mutate()}
+                    disabled={generateAnalysisMutation.isPending}
+                    className="mt-4"
+                  >
+                    {generateAnalysisMutation.isPending ? (
+                      <>Generating Analysis...</>
+                    ) : (
+                      <>Generate AI Analysis</>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
