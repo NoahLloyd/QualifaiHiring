@@ -32,7 +32,7 @@ export default function ApplicantFilters({ jobId, onFilterChange }: ApplicantFil
   const [matchScoreFilter, setMatchScoreFilter] = useState("");
   
   // Fetch available skills for the filter dropdown
-  const { data: skillOptions } = useQuery({
+  const { data: skillOptions = [] } = useQuery<string[]>({
     queryKey: [jobId ? `/api/jobs/${jobId}/skills` : '/api/skills'],
   });
 
@@ -94,7 +94,7 @@ export default function ApplicantFilters({ jobId, onFilterChange }: ApplicantFil
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="shortlisted">Shortlisted</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
@@ -139,7 +139,7 @@ export default function ApplicantFilters({ jobId, onFilterChange }: ApplicantFil
               <SelectValue placeholder="Experience" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any Experience</SelectItem>
+              <SelectItem value="any">Any Experience</SelectItem>
               <SelectItem value="0-2">0-2 years</SelectItem>
               <SelectItem value="3-5">3-5 years</SelectItem>
               <SelectItem value="5-10">5-10 years</SelectItem>
@@ -166,8 +166,8 @@ export default function ApplicantFilters({ jobId, onFilterChange }: ApplicantFil
               <SelectValue placeholder="Skills" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any Skill</SelectItem>
-              {skillOptions?.map((skill: string) => (
+              <SelectItem value="any">Any Skill</SelectItem>
+              {skillOptions.map((skill: string) => (
                 <SelectItem key={skill} value={skill}>{skill}</SelectItem>
               ))}
             </SelectContent>
@@ -188,7 +188,7 @@ export default function ApplicantFilters({ jobId, onFilterChange }: ApplicantFil
               <SelectValue placeholder="Match Score" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any Score</SelectItem>
+              <SelectItem value="any">Any Score</SelectItem>
               <SelectItem value="90+">90% or higher</SelectItem>
               <SelectItem value="80+">80% or higher</SelectItem>
               <SelectItem value="70+">70% or higher</SelectItem>

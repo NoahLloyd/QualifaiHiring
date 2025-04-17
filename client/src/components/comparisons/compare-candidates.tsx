@@ -38,7 +38,7 @@ export default function CompareCandidates({ jobId, initialCandidates = [] }: Com
   const [isComparing, setIsComparing] = useState(false);
 
   // Fetch all available candidates for the select dropdowns
-  const { data: availableCandidates } = useQuery({
+  const { data: availableCandidates = [] } = useQuery<any[]>({
     queryKey: [jobId ? `/api/jobs/${jobId}/applicants` : '/api/applicants'],
   });
 
