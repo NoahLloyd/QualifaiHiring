@@ -34,54 +34,64 @@ export default function Sidebar({ onClose }: SidebarProps) {
         <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
           Dashboard
         </div>
-        <Link href="/">
-          <a
-            className={`flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/">
             <Home className="w-5 h-5 mr-2" />
             Overview
-          </a>
-        </Link>
-        <Link href="/jobs">
-          <a
-            className={`flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/jobs")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+          </Link>
+        </Button>
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/jobs")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/jobs">
             <Briefcase className="w-5 h-5 mr-2" />
             Job Listings
-          </a>
-        </Link>
+          </Link>
+        </Button>
 
         <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
           Applicants
         </div>
-        <Link href="/applicants">
-          <a
-            className={`flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/applicants") && !isActive("/applicants/shortlisted") && !isActive("/applicants/approved")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+        
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/applicants") && !isActive("/applicants/shortlisted") && !isActive("/applicants/approved")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/applicants">
             <Users className="w-5 h-5 mr-2" />
             All Applicants
-          </a>
-        </Link>
-        <Link href="/applicants/shortlisted">
-          <a
-            className={`flex items-center justify-between px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/applicants/shortlisted")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+          </Link>
+        </Button>
+        
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-between items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/applicants/shortlisted")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/applicants/shortlisted">
             <div className="flex items-center">
               <Users className="w-5 h-5 mr-2" />
               Shortlisted
@@ -89,48 +99,81 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <span className="flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full bg-primary-100 text-primary-800">
               14
             </span>
-          </a>
-        </Link>
-        <Link href="/applicants/approved">
-          <a
-            className={`flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/applicants/approved")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+          </Link>
+        </Button>
+        
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/applicants/approved")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/applicants/approved">
             <CheckSquare className="w-5 h-5 mr-2" />
             Approved
-          </a>
-        </Link>
+          </Link>
+        </Button>
+        
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/compare")
+              ? "bg-primary-50 text-primary-700 border border-primary-200"
+              : "text-neutral-700 hover:bg-neutral-100 border border-dashed border-neutral-200"
+          }`}
+          asChild
+        >
+          <Link href="/compare">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+              <path d="M6 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+              <path d="M18 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+              <path d="M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+              <path d="M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
+              <path d="M15 5h-3a9 9 0 0 0-9 9v0"/>
+              <path d="M21 5h-3a9 9 0 0 0-6 2.3"/>
+              <path d="M3 17v-2"/>
+              <path d="M21 17v-2"/>
+            </svg>
+            Compare Candidates
+          </Link>
+        </Button>
 
         <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
           Settings
         </div>
-        <Link href="/settings/ai">
-          <a
-            className={`flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/settings/ai")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+        
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/settings/ai")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/settings/ai">
             <Settings className="w-5 h-5 mr-2" />
             AI Settings
-          </a>
-        </Link>
-        <Link href="/help">
-          <a
-            className={`flex items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-              isActive("/help")
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-700 hover:bg-neutral-100"
-            }`}
-          >
+          </Link>
+        </Button>
+        
+        <Button
+          variant="ghost"
+          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
+            isActive("/help")
+              ? "bg-primary-50 text-primary-700"
+              : "text-neutral-700 hover:bg-neutral-100"
+          }`}
+          asChild
+        >
+          <Link href="/help">
             <LifeBuoy className="w-5 h-5 mr-2" />
             Help & Support
-          </a>
-        </Link>
+          </Link>
+        </Button>
       </nav>
     </>
   );
