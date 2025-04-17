@@ -50,7 +50,11 @@ function Router() {
 }
 
 function App() {
-  return <Router />;
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      <Router />
+    </div>
+  );
 }
 
 export default App;

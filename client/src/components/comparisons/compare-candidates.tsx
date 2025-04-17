@@ -44,7 +44,7 @@ export default function CompareCandidates({ jobId, initialCandidates = [] }: Com
 
   // Fetch detailed data for selected candidates
   const { data: candidateDetails, refetch: refetchCandidateDetails } = useQuery({
-    queryKey: ['/api/applicants/details', { ids: selectedCandidates }],
+    queryKey: [`/api/applicants/details?ids=${selectedCandidates.join(',')}`],
     enabled: selectedCandidates.length > 0,
   });
 
