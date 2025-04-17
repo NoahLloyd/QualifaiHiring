@@ -83,29 +83,29 @@ export default function OverviewMetrics() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <MetricCard
-        title="Total Applicants"
-        value={metrics?.totalApplicants || 0}
-        description="from past 24 hours"
-        icon={<Users className="h-5 w-5 text-primary-600" />}
-        trend={{ value: 24, positive: true }}
+        title="Today's Meetings"
+        value={3} // Would come from API in production
+        description="scheduled interviews"
+        icon={<Clock className="h-5 w-5 text-blue-600" />}
+        actionLabel="View Calendar"
+        onAction={() => window.location.href = "/calendar"}
       />
 
       <MetricCard
-        title="Top Tier Candidates"
-        value={metrics?.topTierCount || 0}
-        description={`AI-recommended (${metrics?.topTierPercentage || 0}%)`}
-        icon={<Award className="h-5 w-5 text-secondary-600" />}
-        actionLabel="View All"
-        onAction={() => window.location.href = "/applicants/top-tier"}
-      />
-
-      <MetricCard
-        title="Next Round Waitlist"
+        title="Applicants to Review"
         value={metrics?.waitlistCount || 0}
-        description="candidates pending review"
-        icon={<Clock className="h-5 w-5 text-neutral-600" />}
-        actionLabel="Schedule"
-        onAction={() => window.location.href = "/schedule-interviews"}
+        description="to stay on track"
+        icon={<Users className="h-5 w-5 text-primary-600" />}
+        trend={{ value: 12, positive: false }}
+      />
+
+      <MetricCard
+        title="Follow-up Emails"
+        value={7} // Would come from API in production
+        description="pending responses"
+        icon={<Clock className="h-5 w-5 text-amber-600" />}
+        actionLabel="Send Now"
+        onAction={() => window.location.href = "/emails"}
       />
     </div>
   );
