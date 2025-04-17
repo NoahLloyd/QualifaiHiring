@@ -428,7 +428,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         applicants = await storage.getApplicantsByJobId(jobId);
       }
       
-      res.json(applicants);
+      // Explicitly include the jobListingId in each applicant object
+      const applicantsWithJobId = applicants.map(applicant => ({
+        ...applicant,
+        jobListingId: jobId
+      }));
+      
+      res.json(applicantsWithJobId);
     } catch (error) {
       console.error("Get job applicants error:", error);
       res.status(500).json({ message: "Failed to get job applicants" });
