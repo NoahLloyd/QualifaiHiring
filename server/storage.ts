@@ -196,6 +196,73 @@ export class MemStorage implements IStorage {
         const matchScore = getRandomInt(60, 99);
         const status = statuses[i];
         
+        // Generate location
+        const cities = [
+          "New York, NY", "San Francisco, CA", "Los Angeles, CA", "Seattle, WA", "Austin, TX", 
+          "Chicago, IL", "Boston, MA", "Denver, CO", "Atlanta, GA", "Miami, FL", 
+          "Portland, OR", "Nashville, TN", "San Diego, CA", "Washington DC", "Philadelphia, PA"
+        ];
+        const location = getRandomElement(cities);
+        
+        // Generate LinkedIn URL
+        const linkedinUrl = `https://linkedin.com/in/${name.toLowerCase().replace(/\s+/g, "-")}-${getRandomInt(10000, 99999)}`;
+        
+        // Generate GitHub URL if applicable (only for developer roles)
+        const hasGitHub = jobId === 2 || (jobId === 3 && getRandomInt(1, 2) === 1); // Full-stack or some data scientists
+        const githubUrl = hasGitHub ? 
+          `https://github.com/${firstName.toLowerCase()}${lastName.toLowerCase()}${getRandomInt(0, 999)}` : null;
+        
+        // Generate portfolio URL if applicable (only for design roles)
+        const hasPortfolio = jobId === 1 || (skills.some(s => 
+          s.toLowerCase().includes("design") || s.toLowerCase().includes("ui") || s.toLowerCase().includes("ux")
+        ));
+        const portfolioUrl = hasPortfolio ? 
+          `https://${name.toLowerCase().replace(/\s+/g, "")}.portfolio.io` : null;
+        
+        // Generate a short bio
+        const bio = `${experience} year${experience !== 1 ? 's' : ''} experienced ${skills[0]} professional passionate about ${skills.slice(1, 3).join(" and ")}. Specializes in building innovative solutions.`;
+        
+        // Generate fake work history
+        const workHistory = JSON.stringify([
+          {
+            company: "Previous Company",
+            title: `Senior ${skills[0]} Developer`,
+            period: `${2023 - Math.min(experience, 2)} - Present`,
+            description: `Working on ${skills.slice(0, 2).join(" and ")} projects.`
+          },
+          ...(experience > 2 ? [{
+            company: "Earlier Company",
+            title: `${skills[0]} ${getRandomInt(1, 2) === 1 ? "Developer" : "Engineer"}`,
+            period: `${2023 - experience} - ${2023 - Math.min(experience, 2)}`,
+            description: "Developed and maintained key systems."
+          }] : [])
+        ]);
+        
+        // Generate education details
+        const educationDetails = JSON.stringify([{
+          degree: education.split(" from ")[0],
+          institution: education.split(" from ")[1] || "University",
+          graduationYear: 2023 - experience - getRandomInt(0, 3),
+          fieldOfStudy: skills[0],
+          achievements: getRandomInt(1, 3) === 1 ? "Graduated with honors" : null
+        }]);
+        
+        // Generate projects
+        const projects = JSON.stringify([
+          {
+            name: `${skills[0]} Project`,
+            description: `A project using ${skills.slice(0, 3).join(", ")} that improved efficiency by 40%.`,
+            skills: skills.slice(0, 3),
+            year: 2023 - getRandomInt(0, Math.min(2, experience))
+          },
+          {
+            name: "Another Project",
+            description: `Developed a solution using ${skills[0]}.`,
+            skills: [skills[0]],
+            year: 2023 - getRandomInt(0, Math.min(2, experience))
+          }
+        ]);
+        
         const applicantData = {
           name,
           email,
@@ -205,14 +272,25 @@ export class MemStorage implements IStorage {
           skills,
           profilePicUrl,
           matchScore,
-          status
+          status,
+          // New persona fields
+          location,
+          bio,
+          linkedinUrl,
+          githubUrl,
+          portfolioUrl,
+          workHistory,
+          education_details: educationDetails,
+          certifications: JSON.stringify([]),
+          projects,
+          references: JSON.stringify([])
         };
         
         // Make sure jobListingId is correctly set
         const applicantWithJob = {
           ...applicantData,
           jobListingId: jobId,
-          resumeUrl: null,
+          resumeUrl: `https://example.com/resumes/${name.toLowerCase().replace(/\s+/g, "_")}_resume.pdf`,
         };
         
         console.log("Creating applicant with jobId:", jobId);
