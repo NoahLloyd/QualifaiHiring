@@ -487,15 +487,40 @@ export class MemStorage implements IStorage {
   }
   
   async getApplicantsByJobId(jobId: number): Promise<Applicant[]> {
-    return Array.from(this.applicants.values()).filter(
-      applicant => applicant.jobListingId === jobId
-    );
+    console.log(`Searching for applicants with jobId: ${jobId}`);
+    
+    const allApplicants = Array.from(this.applicants.values());
+    console.log(`Total applicants: ${allApplicants.length}`);
+    
+    // Check what job listing IDs we have in the database
+    const uniqueJobIds = new Set<number | undefined>();
+    allApplicants.forEach(a => uniqueJobIds.add(a.jobListingId));
+    console.log(`Unique job IDs in database: ${Array.from(uniqueJobIds).join(', ')}`);
+    
+    // Debug: check a few specific applicants
+    console.log(`Applicant #1 jobListingId: ${allApplicants[0]?.jobListingId}, type: ${typeof allApplicants[0]?.jobListingId}`);
+    console.log(`Applicant #2 jobListingId: ${allApplicants[1]?.jobListingId}, type: ${typeof allApplicants[1]?.jobListingId}`);
+    console.log(`Applicant #3 jobListingId: ${allApplicants[2]?.jobListingId}, type: ${typeof allApplicants[2]?.jobListingId}`);
+    
+    // Fix: ensure we're comparing the same types
+    const matches = allApplicants.filter(applicant => {
+      const jobIdMatches = Number(applicant.jobListingId) === Number(jobId);
+      return jobIdMatches;
+    });
+    
+    console.log(`Found ${matches.length} applicants matching jobId: ${jobId}`);
+    return matches;
   }
   
   async getApplicantsByJobIdAndStatus(jobId: number, status: string): Promise<Applicant[]> {
-    return Array.from(this.applicants.values()).filter(
-      applicant => applicant.jobListingId === jobId && applicant.status === status
-    );
+    console.log(`Searching for applicants with jobId: ${jobId} and status: ${status}`);
+    
+    // Fix: ensure we're comparing the same types
+    return Array.from(this.applicants.values()).filter(applicant => {
+      const jobIdMatches = Number(applicant.jobListingId) === Number(jobId);
+      const statusMatches = applicant.status === status;
+      return jobIdMatches && statusMatches;
+    });
   }
   
   async getTopApplicantsByMatchScore(limit: number): Promise<Applicant[]> {
@@ -506,14 +531,17 @@ export class MemStorage implements IStorage {
   }
   
   async getTopApplicantsByJobIdAndMatchScore(jobId: number, limit: number): Promise<Applicant[]> {
-    return Array.from(this.applicants.values())
+    const matches = Array.from(this.applicants.values())
       .filter(applicant => 
-        applicant.jobListingId === jobId && 
+        Number(applicant.jobListingId) === Number(jobId) && 
         applicant.matchScore !== null && 
         applicant.matchScore !== undefined
       )
       .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0))
       .slice(0, limit);
+    
+    console.log(`Found ${matches.length} top applicants for job ID ${jobId}`);
+    return matches;
   }
   
   async createApplicant(applicantData: InsertApplicant): Promise<Applicant> {
@@ -581,9 +609,12 @@ export class MemStorage implements IStorage {
   }
   
   async countApplicantsByJobId(jobId: number): Promise<number> {
-    return Array.from(this.applicants.values()).filter(
-      applicant => applicant.jobListingId === jobId
+    const count = Array.from(this.applicants.values()).filter(
+      applicant => Number(applicant.jobListingId) === Number(jobId)
     ).length;
+    
+    console.log(`Counting applicants for jobId ${jobId}: found ${count}`);
+    return count;
   }
   
   // Applicant note methods
@@ -643,13 +674,14 @@ export class MemStorage implements IStorage {
     const skillsSet = new Set<string>();
     
     Array.from(this.applicants.values())
-      .filter(applicant => applicant.jobListingId === jobId)
+      .filter(applicant => Number(applicant.jobListingId) === Number(jobId))
       .forEach(applicant => {
         if (applicant.skills) {
           applicant.skills.forEach(skill => skillsSet.add(skill));
         }
       });
     
+    console.log(`Found ${skillsSet.size} unique skills for job ID ${jobId}`);
     return Array.from(skillsSet);
   }
   
