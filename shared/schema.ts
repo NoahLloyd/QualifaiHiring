@@ -69,6 +69,17 @@ export const applicants = pgTable("applicants", {
   status: text("status").notNull().default("new"), // new, shortlisted, rejected, approved
   matchScore: integer("match_score"), // 0-100 percentage match
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  // Additional persona details
+  linkedinUrl: text("linkedin_url"),
+  githubUrl: text("github_url"),
+  portfolioUrl: text("portfolio_url"),
+  location: text("location"),
+  bio: text("bio"),
+  workHistory: json("work_history").default('[]'),
+  education_details: json("education_details").default('[]'),
+  certifications: json("certifications").default('[]'),
+  projects: json("projects").default('[]'),
+  references: json("references").default('[]'),
 });
 
 export const insertApplicantSchema = createInsertSchema(applicants).pick({
@@ -82,6 +93,17 @@ export const insertApplicantSchema = createInsertSchema(applicants).pick({
   profilePicUrl: true,
   jobListingId: true,
   status: true,
+  // Additional persona fields
+  linkedinUrl: true,
+  githubUrl: true,
+  portfolioUrl: true,
+  location: true,
+  bio: true,
+  workHistory: true,
+  education_details: true,
+  certifications: true,
+  projects: true,
+  references: true,
 });
 
 export const applicantNotes = pgTable("applicant_notes", {
