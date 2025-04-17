@@ -287,14 +287,14 @@ export class MemStorage implements IStorage {
           references: JSON.stringify([])
         };
         
-        // Make sure jobListingId is correctly set
+        // Make sure jobListingId is correctly set as a number
         const applicantWithJob = {
           ...applicantData,
-          jobListingId: jobId,
+          jobListingId: Number(jobId), // Explicitly convert to number
           resumeUrl: `https://example.com/resumes/${name.toLowerCase().replace(/\s+/g, "_")}_resume.pdf`,
         };
         
-        console.log("Creating applicant with jobId:", jobId);
+        console.log("Creating applicant with jobId:", Number(jobId));
         const applicant = this.createApplicant(applicantWithJob);
         
         // Create AI analysis for each applicant
@@ -367,8 +367,14 @@ export class MemStorage implements IStorage {
       "AWS", "Azure", "GCP", "Database Design", "NoSQL", "Data Ethics"
     ];
     
-    // Create 175 design applicants
-    createRandomApplicants(175, designJobListing.id, designSkills, {
+    // Log job listings before creating applicants
+    console.log('Job Listings for Applicant Creation:');
+    console.log('Design Job ID:', designJobListing.id, 'Type:', typeof designJobListing.id);
+    console.log('Fullstack Job ID:', fullstackJobListing.id, 'Type:', typeof fullstackJobListing.id);
+    console.log('Data Job ID:', dataJobListing.id, 'Type:', typeof dataJobListing.id);
+    
+    // Create 175 design applicants (forcing job ID to be 1)
+    createRandomApplicants(175, 1, designSkills, {
       "new": 60,
       "shortlisted": 25,
       "approved": 10,
@@ -376,7 +382,7 @@ export class MemStorage implements IStorage {
     });
     
     // Create 195 developer applicants
-    createRandomApplicants(195, fullstackJobListing.id, developerSkills, {
+    createRandomApplicants(195, 2, developerSkills, {
       "new": 55,
       "shortlisted": 30,
       "approved": 10,
@@ -384,7 +390,7 @@ export class MemStorage implements IStorage {
     });
     
     // Create 130 data science applicants
-    createRandomApplicants(130, dataJobListing.id, dataSkills, {
+    createRandomApplicants(130, 3, dataSkills, {
       "new": 65,
       "shortlisted": 20,
       "approved": 10,
