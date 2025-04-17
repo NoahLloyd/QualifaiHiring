@@ -52,9 +52,10 @@ export async function getApplicantInsights(jobId: number): Promise<AiInsightsRes
 export async function chatWithAssistant(
   messages: AiAssistantMessage[],
   jobId?: number
-): Promise<{ response: string }> {
+): Promise<string> {
   const response = await apiRequest("POST", "/api/ai/chat", { messages, jobId });
-  return await response.json();
+  const data = await response.json();
+  return data.response;
 }
 
 export async function generateApplicantAnalysis(applicantId: number): Promise<AiSummaryResponse> {

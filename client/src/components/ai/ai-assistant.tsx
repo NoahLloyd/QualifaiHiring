@@ -50,7 +50,7 @@ export default function AiAssistant({ jobId }: AiAssistantProps) {
       
       const assistantMessage: AiAssistantMessage = {
         role: "assistant",
-        content: response.response
+        content: response
       };
       
       setMessages(prev => [...prev, assistantMessage]);
