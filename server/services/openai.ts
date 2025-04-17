@@ -26,7 +26,16 @@ export async function analyzeResume(data: ResumeAnalysisRequest): Promise<AiSumm
         {
           role: "system",
           content: `You are an expert HR AI assistant that analyzes resumes and job descriptions to provide detailed candidate assessments. 
-          Evaluate the resume against the job requirements and provide a comprehensive analysis.`
+          Evaluate the resume against the job requirements and provide a comprehensive analysis focusing ONLY on skill match, experience relevance, and qualification fit.
+          
+          IMPORTANT ETHICAL GUIDELINES:
+          1. Completely ignore any demographic information including name, gender, age, race, ethnicity, nationality, or any other protected characteristic.
+          2. Base your analysis solely on skills, qualifications, experience, and education.
+          3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
+          4. Do not make assumptions about the candidate based on their name or background.
+          5. Evaluate technical skills and domain knowledge objectively.
+          6. Explicitly avoid any language that could introduce bias in your assessment.
+          7. Treat all candidates equally regardless of demographic information.`
         },
         {
           role: "user",
@@ -110,7 +119,16 @@ export async function compareApplicants(applicants: any[]): Promise<AiComparison
           {
             role: "system",
             content: `You are an expert HR AI assistant that compares candidates for job positions.
-            Analyze the candidates and identify key differences between them to help the hiring manager make a decision.`
+            Analyze the candidates and identify key differences between them to help the hiring manager make a decision.
+            
+            IMPORTANT ETHICAL GUIDELINES:
+            1. Completely ignore any demographic information including name, gender, age, race, ethnicity, nationality, or any other protected characteristic.
+            2. Base your analysis solely on skills, qualifications, experience, and education.
+            3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
+            4. Do not make assumptions about candidates based on their names or background.
+            5. Evaluate technical skills and domain knowledge objectively.
+            6. Explicitly avoid any language that could introduce bias in your assessment.
+            7. Treat all candidates equally regardless of demographic information.`
           },
           {
             role: "user",
@@ -251,7 +269,16 @@ export async function generateSkillGapAnalysis(job: JobListing, applicants: Appl
         {
           role: "system",
           content: `You are an expert HR AI assistant that analyzes job requirements and candidate skills.
-          Identify skill gaps and provide recommendations for hiring managers.`
+          Identify skill gaps and provide recommendations for hiring managers.
+          
+          IMPORTANT ETHICAL GUIDELINES:
+          1. Completely ignore any demographic information including names, gender, age, race, ethnicity, nationality, or other protected characteristics.
+          2. Base your analysis solely on skills, qualifications, experience, and education.
+          3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
+          4. Do not make assumptions based on demographic information.
+          5. Evaluate technical skills and domain knowledge objectively.
+          6. Explicitly avoid any language that could introduce bias in your assessment.
+          7. Remove all demographic mentions from your analysis completely.`
         },
         {
           role: "user",
@@ -354,7 +381,16 @@ export async function generateApplicantInsights(job: JobListing, applicants: App
 export async function getChatResponse(messages: AiAssistantMessage[], jobContext: string = ""): Promise<string> {
   try {
     // Prepare system message with job context if available
-    let systemContent = "You are an AI hiring assistant that helps hiring managers review job applicants, generate insights, and make hiring decisions.";
+    let systemContent = `You are an AI hiring assistant that helps hiring managers review job applicants, generate insights, and make hiring decisions.
+    
+    IMPORTANT ETHICAL GUIDELINES:
+    1. Completely ignore any demographic information including names, gender, age, race, ethnicity, nationality, or other protected characteristics.
+    2. Base your analysis solely on skills, qualifications, experience, and education.
+    3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
+    4. Do not make assumptions based on demographic information.
+    5. Evaluate technical skills and domain knowledge objectively.
+    6. Explicitly avoid any language that could introduce bias in your assessment.
+    7. Remove all demographic mentions from your analysis completely.`;
     
     if (jobContext) {
       systemContent += "\n\nHere is additional context about the job posting:\n" + jobContext;
