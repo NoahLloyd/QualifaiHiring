@@ -11,33 +11,40 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      
       {/* Protected routes wrapped in the sidebar layout */}
-      <Route path="/">
-        <SidebarLayout>
-          <Dashboard />
-        </SidebarLayout>
-      </Route>
       <Route path="/jobs/:jobId">
         {params => (
           <SidebarLayout>
-            <JobOverview jobId={parseInt(params.jobId)} />
+            <JobOverview jobId={parseInt(params.jobId) || 1} />
           </SidebarLayout>
         )}
       </Route>
+      
       <Route path="/applicants/:id">
         {params => (
           <SidebarLayout>
-            <ApplicantDetail id={parseInt(params.id)} />
+            <ApplicantDetail id={parseInt(params.id) || 1} />
           </SidebarLayout>
         )}
       </Route>
+      
       <Route path="/compare">
         <SidebarLayout>
           <Compare />
         </SidebarLayout>
       </Route>
+      
+      <Route path="/">
+        <SidebarLayout>
+          <Dashboard />
+        </SidebarLayout>
+      </Route>
+      
       {/* Fallback 404 route */}
-      <Route component={NotFound} />
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }
