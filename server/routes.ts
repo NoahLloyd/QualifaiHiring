@@ -220,6 +220,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Applicant not found" });
       }
       
+      // Make sure jobListingId is always included in the response
+      if (applicant.jobListingId === undefined) {
+        console.log("Warning: Applicant missing jobListingId:", applicantId);
+      }
+      
       res.json(applicant);
     } catch (error) {
       console.error("Get applicant error:", error);
