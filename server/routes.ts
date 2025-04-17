@@ -170,7 +170,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         applicants = await storage.getAllApplicants();
       }
       
-      res.json(applicants);
+      // Ensure all applicants have jobListingId
+      const applicantsWithJobId = applicants.map(applicant => {
+        if (applicant.jobListingId === undefined) {
+          console.log(`Fixing applicant ${applicant.id} with missing jobListingId`);
+          return {
+            ...applicant,
+            jobListingId: 1 // Default to job 1 if missing
+          };
+        }
+        return applicant;
+      });
+      
+      res.json(applicantsWithJobId);
     } catch (error) {
       console.error("Get applicants error:", error);
       res.status(500).json({ message: "Failed to get applicants" });
@@ -223,9 +235,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Make sure jobListingId is always included in the response
       if (applicant.jobListingId === undefined) {
         console.log("Warning: Applicant missing jobListingId:", applicantId);
+        // Fix: add a default jobListingId
+        const applicantWithJobId = {
+          ...applicant,
+          jobListingId: 1 // Default to job 1 if missing
+        };
+        res.json(applicantWithJobId);
+      } else {
+        res.json(applicant);
       }
-      
-      res.json(applicant);
     } catch (error) {
       console.error("Get applicant error:", error);
       res.status(500).json({ message: "Failed to get applicant" });
@@ -246,7 +264,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Applicant not found" });
       }
       
-      const job = await storage.getJobListing(applicant.jobListingId);
+      // Make sure applicant has a jobListingId
+      const jobId = applicant.jobListingId || 1; // Default to job 1 if missing
+      
+      const job = await storage.getJobListing(jobId);
       
       if (!job) {
         return res.status(404).json({ message: "Job not found" });

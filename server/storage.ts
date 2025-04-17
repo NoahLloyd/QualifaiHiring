@@ -208,11 +208,15 @@ export class MemStorage implements IStorage {
           status
         };
         
-        const applicant = this.createApplicant({
+        // Make sure jobListingId is correctly set
+        const applicantWithJob = {
           ...applicantData,
           jobListingId: jobId,
           resumeUrl: null,
-        });
+        };
+        
+        console.log("Creating applicant with jobId:", jobId);
+        const applicant = this.createApplicant(applicantWithJob);
         
         // Create AI analysis for each applicant
         this.createAiAnalysis({
