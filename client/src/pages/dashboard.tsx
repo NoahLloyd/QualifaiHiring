@@ -11,10 +11,10 @@ export default function Dashboard() {
       {/* Overview Metrics - Personalized for Hiring Manager */}
       <OverviewMetrics />
 
-      {/* Hiring Manager Overview and Application Trends */}
+      {/* Job Listings and Application Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <HiringManagerOverview />
+          <JobListingsOverview />
         </div>
         
         <div>
@@ -26,8 +26,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Job Listings Overview */}
-      <JobListingsOverview />
+      {/* Hiring Manager Overview */}
+      <HiringManagerOverview />
     </div>
   );
 }
