@@ -56,3 +56,8 @@ export async function chatWithAssistant(
   const response = await apiRequest("POST", "/api/ai/chat", { messages, jobId });
   return await response.json();
 }
+
+export async function generateApplicantAnalysis(applicantId: number): Promise<AiSummaryResponse> {
+  const response = await apiRequest("POST", "/api/ai/generate-analysis", { applicantId });
+  return await response.json();
+}

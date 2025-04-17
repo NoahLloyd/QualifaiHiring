@@ -746,6 +746,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to compare applicants" });
     }
   });
+  
+  // Generate AI analysis for an existing applicant
+  app.post("/api/ai/generate-analysis", async (req, res) => {
+    try {
+      const { applicantId } = req.body;
+      
+      if (!applicantId) {
+        return res.status(400).json({ message: "Applicant ID is required" });
+      }
+      
+      // Get the applicant data
+      const applicant = await storage.getApplicant(Number(applicantId));
+      
+      if (!applicant) {
+        return res.status(404).json({ message: "Applicant not found" });
+      }
+      
+      // Check if AI analysis already exists
+      const existingAnalysis = await storage.getAiAnalysisByApplicantId(applicant.id);
+      
+      if (existingAnalysis) {
+        return res.json(existingAnalysis);
+      }
+      
+      // Get job description
+      const job = await storage.getJobListing(Number(applicant.jobListingId));
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      // Generate resume text based on applicant information
+      let resumeText = `Name: ${applicant.name}\n`;
+      resumeText += `Email: ${applicant.email}\n`;
+      resumeText += `Experience: ${applicant.experience || 0} years\n`;
+      resumeText += `Education: ${applicant.education || 'Not specified'}\n`;
+      resumeText += `Skills: ${applicant.skills ? applicant.skills.join(', ') : 'Not specified'}\n`;
+      
+      // Add more detailed information if available
+      if (applicant.workHistory) {
+        resumeText += "\nWork History:\n";
+        const workHistory = Array.isArray(applicant.workHistory) ? applicant.workHistory : [];
+        workHistory.forEach((job: any) => {
+          resumeText += `- ${job.title} at ${job.company} (${job.startDate} - ${job.endDate})\n`;
+          resumeText += `  ${job.description}\n`;
+        });
+      }
+      
+      // Add projects if available
+      if (applicant.projects) {
+        resumeText += "\nProjects:\n";
+        const projects = Array.isArray(applicant.projects) ? applicant.projects : [];
+        projects.forEach((project: any) => {
+          resumeText += `- ${project.name}: ${project.description}\n`;
+        });
+      }
+      
+      // Create job description from job listing
+      const jobDescription = `${job.title}\n${job.description}\n${job.requirements}`;
+      
+      // Analyze the resume
+      const analysis = await analyzeResume({ resumeText, jobDescription });
+      
+      // Save AI analysis
+      const savedAnalysis = await storage.createAiAnalysis({
+        applicantId: applicant.id,
+        summary: analysis.summary,
+        strengths: analysis.strengths,
+        weaknesses: analysis.weaknesses,
+        skills: analysis.skills,
+        experience: analysis.experience,
+        rating: analysis.rating,
+        recommendations: analysis.recommendations
+      });
+      
+      // Update match score based on AI rating
+      await storage.updateApplicantMatchScore(applicant.id, analysis.rating);
+      
+      res.json(savedAnalysis);
+    } catch (error) {
+      console.error("AI analysis generation error:", error);
+      res.status(500).json({ message: "Failed to generate AI analysis" });
+    }
+  });
 
   const httpServer = createServer(app);
 
