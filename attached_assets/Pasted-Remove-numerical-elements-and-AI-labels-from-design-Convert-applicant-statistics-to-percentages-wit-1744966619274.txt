@@ -1,0 +1,37 @@
+Remove numerical elements and AI labels from design
+Convert applicant statistics to percentages with pie/donut charts for better visualization
+Adjust spacing and color (make buttons green)
+Move download buttons to the right side
+Remove profile pictures and make names bigger
+Add insight summary explaining recommendations
+Include 'analyze and compare' button
+Display applicant sources (LinkedIn, Snap, Indeed, Greenhouse)
+Add today's meetings section for hiring manager reference
+📋 Applicant Details Page Improvements (05:16 - 08:26)
+Remove 'poor fit' and 'all applicants' categories
+Color code applicants (green, yellow, red)
+Keep search and status functions
+Consolidate resume section
+Add AI match score with explanation
+Include career trajectory prediction
+Provide AI analysis with skills breakdown (education, technical, soft skills)
+Create a comment thread system for hiring team discussions
+Add social links section (LinkedIn, Instagram, GitHub)
+Show application trends by job board
+🤖 AI Integration and Analysis Features (08:27 - 11:24)
+Add LLM functionality for hiring managers to query applicant pool
+Restrict demographic queries (gender percentages, etc.)
+Create word map/bubble for top skills visualization
+Show distribution of applicants matching required skills
+Implement card view for candidate comparison (limited to 3 max)
+Display experience, skills, match score in comparison view
+Include AI recommendations for best fit candidates
+Create separate sections for rejected, shortlisted, and approved applicants
+Replace three-dot menu with approve/shortlist/reject buttons
+🎥 Technical Demo and Final Improvements (11:25 - 13:45)
+Add technical demo video section in applicant profile
+Include AI insights on technical understanding with percentage
+Show key highlights of performance with recommendations
+Add hiring manager profile elements
+Include notification bell and team communications inbox
+Provide contextual AI analysis of candidate actions from video demonstrations

@@ -1,12 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/ui/data-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MoreHorizontal, Eye, FilePlus, Check, X, ArrowLeftRight } from "lucide-react";
-import { AvatarFallbackInitials } from "@/components/ui/avatar-fallback";
+import { MoreHorizontal, Eye, FilePlus, Check, X, ArrowLeftRight, Download } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Applicant } from "@shared/schema";
 import {
@@ -31,8 +29,7 @@ interface ApplicantsTableProps {
 const MATCH_CATEGORIES = {
   GREAT_FIT: { min: 95, label: "Great Fit (95%+)" },
   GOOD_FIT: { min: 51, max: 94, label: "Good Fit (51-94%)" },
-  NOT_GOOD_FIT: { min: 30, max: 50, label: "Not a Good Fit (30-50%)" },
-  POOR_FIT: { max: 29, label: "Poor Fit (<30%)" }
+  NOT_GOOD_FIT: { min: 30, max: 50, label: "Not a Good Fit (30-50%)" }
 };
 
 export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps) {
@@ -56,7 +53,7 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
   };
   
   // Function to filter applicants based on match score category
-  const filterApplicantsByMatchCategory = (category: string): Applicant[] => {
+  const filterApplicantsByMatchCategory = useCallback((category: string): Applicant[] => {
     if (!applicants.length) return [];
     
     // Make a copy of applicants and sort by match score (highest to lowest)
@@ -76,13 +73,11 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
           return score >= MATCH_CATEGORIES.GOOD_FIT.min && score <= MATCH_CATEGORIES.GOOD_FIT.max;
         case "not-good-fit":
           return score >= MATCH_CATEGORIES.NOT_GOOD_FIT.min && score <= MATCH_CATEGORIES.NOT_GOOD_FIT.max;
-        case "poor-fit":
-          return score <= MATCH_CATEGORIES.POOR_FIT.max;
         default:
           return true;
       }
     });
-  };
+  }, [applicants]);
 
   const columns: ColumnDef<Applicant>[] = [
     {
@@ -231,8 +226,8 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
       cell: ({ row }) => {
         const score = row.original.matchScore || 0;
         let bgColor = "bg-red-100 text-red-800";
-        if (score >= 80) bgColor = "bg-green-100 text-green-800";
-        else if (score >= 60) bgColor = "bg-yellow-100 text-yellow-800";
+        if (score >= 95) bgColor = "bg-green-100 text-green-800";
+        else if (score >= 51) bgColor = "bg-yellow-100 text-yellow-800";
         
         return (
           <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${bgColor}`}>
@@ -295,9 +290,13 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
           recommendation = "Shows adjacent skills that could apply to this role.";
         }
         
+        // Add source information if available (LinkedIn, Indeed, etc.)
+        const source = applicant.source || "Direct";
+        
         return (
           <div className="max-w-xs">
             <div className="text-sm text-neutral-700">{recommendation}</div>
+            <div className="text-xs text-neutral-500 mt-1">Source: {source}</div>
           </div>
         );
       }
@@ -377,7 +376,6 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
   const greatFitCount = filterApplicantsByMatchCategory("great-fit").length;
   const goodFitCount = filterApplicantsByMatchCategory("good-fit").length;
   const notGoodFitCount = filterApplicantsByMatchCategory("not-good-fit").length;
-  const poorFitCount = filterApplicantsByMatchCategory("poor-fit").length;
   
   const filteredApplicants = filterApplicantsByMatchCategory(activeMatchTab);
 
@@ -437,31 +435,43 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
             Rejected ({rejectedCount})
           </Button>
         </div>
-        {selectedRows.length > 0 && (
-          <div className="flex space-x-2">
-            <Button size="sm" variant="outline" onClick={() => {
-              selectedRows.forEach(id => handleStatusChange(id, 'shortlisted'));
-              setSelectedRows([]);
-            }}>
-              <Check className="mr-2 h-4 w-4" />
-              Shortlist Selected
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => {
-              selectedRows.forEach(id => handleStatusChange(id, 'approved'));
-              setSelectedRows([]);
-            }}>
-              <Check className="mr-2 h-4 w-4 text-green-600" />
-              Approve Selected
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => {
-              selectedRows.forEach(id => handleStatusChange(id, 'rejected'));
-              setSelectedRows([]);
-            }}>
-              <X className="mr-2 h-4 w-4 text-red-600" />
-              Reject Selected
-            </Button>
-          </div>
-        )}
+        
+        <div className="flex space-x-2">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="ml-auto"
+            onClick={() => {/* Would handle CSV export */}}
+          >
+            <Download className="h-4 w-4 mr-2" /> Export
+          </Button>
+          
+          {selectedRows.length > 0 && (
+            <>
+              <Button size="sm" variant="outline" onClick={() => {
+                selectedRows.forEach(id => handleStatusChange(id, 'shortlisted'));
+                setSelectedRows([]);
+              }}>
+                <Check className="mr-2 h-4 w-4" />
+                Shortlist Selected
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => {
+                selectedRows.forEach(id => handleStatusChange(id, 'approved'));
+                setSelectedRows([]);
+              }}>
+                <Check className="mr-2 h-4 w-4 text-green-600" />
+                Approve Selected
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => {
+                selectedRows.forEach(id => handleStatusChange(id, 'rejected'));
+                setSelectedRows([]);
+              }}>
+                <X className="mr-2 h-4 w-4 text-red-600" />
+                Reject Selected
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       
       <Card className="shadow-sm">
