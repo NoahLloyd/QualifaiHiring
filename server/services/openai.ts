@@ -15,45 +15,91 @@ export interface ResumeAnalysisRequest {
   jobDescription: string;
 }
 
-// Analyze resume and generate AI summary response
+// Analyze resume and generate AI summary response with enhanced semantic reasoning
 export async function analyzeResume(data: ResumeAnalysisRequest): Promise<AiSummaryResponse> {
   try {
     const { resumeText, jobDescription } = data;
     
+    // First, extract key requirements and skills from the job description using NLU
+    const jobAnalysisResponse = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert at analyzing job descriptions and extracting key requirements. 
+          Use semantic understanding to identify not just explicit skills but also implicit requirements and responsibilities.`
+        },
+        {
+          role: "user",
+          content: `
+          Extract the key requirements, skills, experiences, and qualifications from this job description.
+          Focus on technical skills, soft skills, experience level, educational requirements, and key responsibilities.
+          
+          Job Description: 
+          ${jobDescription}
+          
+          Provide your analysis in JSON format:
+          {
+            "core_skills": ["skill1", "skill2", ...],
+            "secondary_skills": ["skill1", "skill2", ...],
+            "experience_requirements": ["requirement1", "requirement2", ...], 
+            "key_responsibilities": ["responsibility1", "responsibility2", ...],
+            "education_requirements": ["education1", "education2", ...],
+            "domain_knowledge": ["domain1", "domain2", ...]
+          }
+          `
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    // Parse job analysis response
+    const jobAnalysisContent = jobAnalysisResponse.choices[0].message.content;
+    const jobRequirements = JSON.parse(jobAnalysisContent || "{}");
+    
+    // Now, analyze the resume against these extracted requirements with semantic reasoning
     const response = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [
         {
           role: "system",
-          content: `You are an expert HR AI assistant that analyzes resumes and job descriptions to provide detailed candidate assessments. 
-          Evaluate the resume against the job requirements and provide a comprehensive analysis focusing ONLY on skill match, experience relevance, and qualification fit.
+          content: `You are an expert HR AI assistant that performs deep semantic analysis of candidate qualifications against job requirements. 
+          
+          APPROACH TO SEMANTIC REASONING:
+          1. Use contextual understanding to identify skills and experiences, even when not explicitly stated
+          2. Recognize equivalent skills and technologies that serve similar purposes
+          3. Evaluate depth of experience, not just presence of keywords
+          4. Consider how transferable skills from different domains might apply to this role
+          5. Assess potential for growth and adaptation based on learning trajectory
           
           IMPORTANT ETHICAL GUIDELINES:
-          1. Completely ignore any demographic information including name, gender, age, race, ethnicity, nationality, or any other protected characteristic.
-          2. Base your analysis solely on skills, qualifications, experience, and education.
-          3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
-          4. Do not make assumptions about the candidate based on their name or background.
-          5. Evaluate technical skills and domain knowledge objectively.
-          6. Explicitly avoid any language that could introduce bias in your assessment.
-          7. Treat all candidates equally regardless of demographic information.`
+          1. Completely ignore any demographic information including name, gender, age, race, ethnicity, nationality, or any other protected characteristic
+          2. Base your analysis solely on skills, qualifications, experience, and education
+          3. Do not make assumptions about the candidate based on their name or background
+          4. Evaluate technical skills and domain knowledge objectively
+          5. Explicitly avoid any language that could introduce bias in your assessment
+          6. Treat all candidates equally regardless of demographic information`
         },
         {
           role: "user",
           content: `
-          Job Description: 
-          ${jobDescription}
+          Job Requirements Analysis:
+          ${JSON.stringify(jobRequirements, null, 2)}
           
           Resume:
           ${resumeText}
           
-          Provide a detailed analysis of this candidate in JSON format with the following structure:
+          Analyze this candidate using semantic reasoning to understand their qualifications beyond just keyword matching.
+          Look for evidence of skills and experiences that might be described in different terms but are semantically equivalent.
+          
+          Provide a detailed analysis in JSON format with the following structure:
           {
             "summary": "A concise overview of the candidate's fit for the role (1-2 paragraphs)",
             "strengths": ["List of 3-5 candidate strengths relevant to the job"],
             "weaknesses": ["List of 2-3 areas where the candidate might not meet job requirements"],
             "skills": {"skill_name": rating_out_of_10, ...},
             "experience": {"job_title": {"company": "company_name", "highlights": ["achievement1", "achievement2"]}},
-            "rating": match_score_out_of_100,
+            "rating": match_score_out_of_10,
             "recommendations": "Specific recommendations for the hiring manager"
           }
           `
@@ -62,9 +108,12 @@ export async function analyzeResume(data: ResumeAnalysisRequest): Promise<AiSumm
       response_format: { type: "json_object" }
     });
 
-    // Parse the response
+    // Parse the candidate analysis response
     const content = response.choices[0].message.content;
     const parsedAnalysis = JSON.parse(content || "{}") as AiSummaryResponse;
+    
+    // Calculate final score, ensuring it's out of 100
+    const rating = Math.min(parsedAnalysis.rating * 10, 100);
     
     // Ensure all required fields are present
     return {
@@ -73,7 +122,7 @@ export async function analyzeResume(data: ResumeAnalysisRequest): Promise<AiSumm
       weaknesses: parsedAnalysis.weaknesses || [],
       skills: parsedAnalysis.skills || {},
       experience: parsedAnalysis.experience || {},
-      rating: parsedAnalysis.rating || 50,
+      rating: rating || 50,
       recommendations: parsedAnalysis.recommendations || ""
     };
   } catch (error) {
@@ -102,15 +151,15 @@ export async function compareApplicants(applicants: any[]): Promise<AiComparison
       education: applicant.education,
       skills: applicant.skills,
       matchScore: applicant.matchScore,
+      workHistory: applicant.workHistory || [],
+      projects: applicant.projects || [],
       aiAnalysis: applicant.aiAnalysis || {}
     }));
     
-    // Since OpenAI API might be rate limited, we'll provide a mock response
-    // for testing purposes that doesn't require calling the API
-    console.log("Generating mock comparison for applicants:", applicantsData.map(a => a.name).join(", "));
+    console.log("Generating enhanced semantic comparison for applicants:", applicantsData.map(a => a.name).join(", "));
     
-    // Only proceed with OpenAI if specifically requested (bypassing for now due to rate limits)
-    const useMockData = true;
+    // Use the OpenAI API for enhanced semantic analysis
+    const useMockData = false;
     
     if (!useMockData) {
       const response = await openai.chat.completions.create({
@@ -118,34 +167,42 @@ export async function compareApplicants(applicants: any[]): Promise<AiComparison
         messages: [
           {
             role: "system",
-            content: `You are an expert HR AI assistant that compares candidates for job positions.
-            Analyze the candidates and identify key differences between them to help the hiring manager make a decision.
+            content: `You are an expert HR AI assistant that performs deep semantic comparison of candidates using NLU capabilities.
+            
+            APPROACH TO SEMANTIC COMPARISON:
+            1. Identify meaningful patterns and differences beyond surface-level keyword comparisons
+            2. Recognize complementary skill sets and how they might benefit different aspects of the role
+            3. Analyze career trajectories and potential growth paths based on past progression
+            4. Consider skill transferability across different domains and technologies
+            5. Evaluate depth vs breadth of expertise and how it relates to different role requirements
             
             IMPORTANT ETHICAL GUIDELINES:
-            1. Completely ignore any demographic information including name, gender, age, race, ethnicity, nationality, or any other protected characteristic.
-            2. Base your analysis solely on skills, qualifications, experience, and education.
-            3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
-            4. Do not make assumptions about candidates based on their names or background.
-            5. Evaluate technical skills and domain knowledge objectively.
-            6. Explicitly avoid any language that could introduce bias in your assessment.
-            7. Treat all candidates equally regardless of demographic information.`
+            1. Completely ignore any demographic information including name, gender, age, race, ethnicity, nationality, or any other protected characteristic
+            2. Base your analysis solely on skills, qualifications, experience, and education
+            3. Do not make assumptions about candidates based on their names or background
+            4. Evaluate technical skills and domain knowledge objectively
+            5. Explicitly avoid any language that could introduce bias in your assessment
+            6. Treat all candidates equally regardless of demographic information`
           },
           {
             role: "user",
             content: `
-            Compare the following candidates and provide an analysis of their differences:
+            Compare the following candidates using advanced semantic reasoning to look beyond just keywords.
+            Analyze how their skills and experiences might semantically relate to potential job requirements,
+            even when different terminology is used.
             
+            Candidate Data:
             ${JSON.stringify(applicantsData, null, 2)}
             
-            Provide a detailed comparison in JSON format with the following structure:
+            Provide a detailed semantic comparison in JSON format with the following structure:
             {
-              "differentiators": ["List of 2-3 key areas that most differentiate the candidates"],
-              "recommendation": "A thoughtful recommendation on which candidate might be better suited for what types of roles",
+              "differentiators": ["List of 3-4 key areas that most meaningfully differentiate the candidates"],
+              "recommendation": "A thoughtful recommendation highlighting each candidate's unique strengths",
               "keyDifferences": {
-                "experience": {"candidate1": "summary of first candidate", "candidate2": "summary of second candidate"},
-                "education": {"candidate1": "...", "candidate2": "..."},
-                "technicalSkills": {"candidate1": "...", "candidate2": "..."},
-                "softSkills": {"candidate1": "...", "candidate2": "..."}
+                "experience_quality": {"candidate1": "analysis of depth/quality of experience", "candidate2": "..."},
+                "skill_relevance": {"candidate1": "analysis of how skills align with modern needs", "candidate2": "..."},
+                "growth_trajectory": {"candidate1": "analysis of learning/growth pattern", "candidate2": "..."},
+                "work_approach": {"candidate1": "inferred work style and approach", "candidate2": "..."}
               }
             }
             `
@@ -237,7 +294,7 @@ export async function compareApplicants(applicants: any[]): Promise<AiComparison
   }
 }
 
-// Generate skill gap analysis
+// Generate skill gap analysis using enhanced semantic reasoning
 export async function generateSkillGapAnalysis(job: JobListing, applicants: Applicant[]): Promise<any> {
   try {
     // Extract skills from applicants
@@ -262,23 +319,63 @@ export async function generateSkillGapAnalysis(job: JobListing, applicants: Appl
       skillPercentages[skill] = Math.round((count / applicants.length) * 100);
     });
     
-    // Send to OpenAI for analysis and recommendations
+    // First, extract implied and explicit skill requirements from the job description
+    const jobAnalysisResponse = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert at analyzing job descriptions and extracting both explicit and implicit skill requirements.
+          Use semantic understanding to identify skills that may be described using different terminology.`
+        },
+        {
+          role: "user",
+          content: `
+          Extract both the explicit skills directly mentioned in the job posting and the implicit skills that would be necessary
+          to perform the job successfully, even if not directly mentioned.
+          
+          Job Title: ${job.title}
+          Job Description: ${job.description}
+          Job Requirements: ${job.requirements}
+          
+          Provide the results in JSON format:
+          {
+            "explicit_skills": ["skill1", "skill2", ...],
+            "implicit_skills": ["skill1", "skill2", ...],
+            "skill_importance": {"skill1": "high|medium|low", "skill2": "high|medium|low", ...},
+            "skill_categories": {"technical": ["skill1", "skill2"], "soft": ["skill3"], "domain": ["skill4"]}
+          }
+          `
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+    
+    // Parse job analysis
+    const jobAnalysisContent = jobAnalysisResponse.choices[0].message.content;
+    const jobSkillAnalysis = JSON.parse(jobAnalysisContent || "{}");
+    
+    // Now perform skill gap analysis with semantic understanding
     const response = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [
         {
           role: "system",
-          content: `You are an expert HR AI assistant that analyzes job requirements and candidate skills.
-          Identify skill gaps and provide recommendations for hiring managers.
+          content: `You are an expert HR AI assistant that performs deep semantic analysis of skill gaps using NLU capabilities.
+          
+          APPROACH TO SEMANTIC ANALYSIS:
+          1. Look beyond exact skill name matches to identify semantic equivalents
+          2. Understand skill relationships and how different skills might compensate for others
+          3. Consider skill transferability across domains
+          4. Identify emerging skills that might be valuable but rare
+          5. Recognize skill clusters and patterns that indicate capability gaps
           
           IMPORTANT ETHICAL GUIDELINES:
-          1. Completely ignore any demographic information including names, gender, age, race, ethnicity, nationality, or other protected characteristics.
-          2. Base your analysis solely on skills, qualifications, experience, and education.
-          3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
-          4. Do not make assumptions based on demographic information.
-          5. Evaluate technical skills and domain knowledge objectively.
-          6. Explicitly avoid any language that could introduce bias in your assessment.
-          7. Remove all demographic mentions from your analysis completely.`
+          1. Completely ignore any demographic information including names, gender, age, race, ethnicity, nationality, or other protected characteristics
+          2. Base your analysis solely on skills, qualifications, and job requirements
+          3. Do not make assumptions based on demographic information
+          4. Evaluate technical skills and domain knowledge objectively
+          5. Explicitly avoid any language that could introduce bias in your assessment`
         },
         {
           role: "user",
@@ -287,15 +384,24 @@ export async function generateSkillGapAnalysis(job: JobListing, applicants: Appl
           Job Description: ${job.description}
           Job Requirements: ${job.requirements}
           
+          Job Skill Analysis:
+          ${JSON.stringify(jobSkillAnalysis, null, 2)}
+          
           Candidate Skill Distribution:
           ${JSON.stringify(skillPercentages, null, 2)}
           
-          Analyze the skill distribution against the job requirements and provide a recommendation for the hiring manager.
-          Focus on identifying skills that are underrepresented in the applicant pool compared to job requirements.
+          Perform a semantic skill gap analysis that looks beyond exact skill matches. Consider:
+          1. Skills in the applicant pool that might semantically fulfill requirements even if named differently
+          2. Skills that are critically missing based on job requirements
+          3. Skill combinations that might compensate for missing individual skills
+          4. Emerging skills that are rare but high-value
           
           Provide your analysis in JSON format:
           {
-            "recommendations": "Your analysis and recommendation for the hiring manager"
+            "critical_gaps": ["gap1", "gap2", ...],
+            "semantic_matches": {"required_skill": ["alternative_skill1", "alternative_skill2"]},
+            "skill_recommendations": "Detailed recommendations for addressing skill gaps",
+            "sourcing_strategy": "Recommendations for finding candidates with missing skills"
           }
           `
         }
@@ -305,11 +411,15 @@ export async function generateSkillGapAnalysis(job: JobListing, applicants: Appl
 
     // Parse the response
     const content = response.choices[0].message.content;
-    const parsedRecommendation = JSON.parse(content || "{}");
+    const parsedAnalysis = JSON.parse(content || "{}");
     
+    // Combine skill percentages with semantic analysis
     return {
       skills: skillPercentages,
-      recommendations: parsedRecommendation.recommendations || "No recommendations available."
+      criticalGaps: parsedAnalysis.critical_gaps || [],
+      semanticMatches: parsedAnalysis.semantic_matches || {},
+      recommendations: parsedAnalysis.skill_recommendations || "No recommendations available.",
+      sourcingStrategy: parsedAnalysis.sourcing_strategy || "No sourcing strategy available."
     };
   } catch (error) {
     console.error("Error generating skill gap analysis:", error);
@@ -320,7 +430,7 @@ export async function generateSkillGapAnalysis(job: JobListing, applicants: Appl
   }
 }
 
-// Generate insights from applicant data
+// Generate insights from applicant data using enhanced semantic reasoning
 export async function generateApplicantInsights(job: JobListing, applicants: Applicant[]): Promise<any> {
   try {
     // Extract basic stats
@@ -342,6 +452,60 @@ export async function generateApplicantInsights(job: JobListing, applicants: App
       }
     });
     
+    // Extract sample of applicant data for analysis
+    // Limit to 10 applicants to stay within token limits
+    const applicantSample = applicants.slice(0, 10).map(applicant => ({
+      experience: applicant.experience,
+      skills: applicant.skills,
+      education: applicant.education,
+      matchScore: applicant.matchScore
+    }));
+    
+    // Use NLU to generate semantic insights about the applicant pool
+    const insightsResponse = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert HR analyst that uses semantic reasoning to identify patterns and insights 
+          from applicant data. Look beyond surface-level statistics to find meaningful insights.`
+        },
+        {
+          role: "user",
+          content: `
+          Analyze this applicant pool for a job position using natural language understanding to identify
+          patterns, trends, and insights that might not be obvious from basic statistics.
+          
+          Job Title: ${job.title}
+          Job Description: ${job.description}
+          
+          Applicant Stats:
+          - Total Applicants: ${applicants.length}
+          - Average Experience: ${Math.round(averageExperience * 10) / 10} years
+          - Average Match Score: ${Math.round(averageMatchScore)}%
+          
+          Sample of Applicant Data (limited to 10 for analysis):
+          ${JSON.stringify(applicantSample, null, 2)}
+          
+          Generate semantic insights about this applicant pool in JSON format:
+          {
+            "key_insights": ["insight1", "insight2", "insight3"],
+            "skill_trends": "Analysis of skill patterns and emerging trends",
+            "experience_distribution": "Analysis of experience patterns",
+            "hidden_patterns": "Patterns that might not be obvious from statistics alone",
+            "recommendations": "Strategic recommendations based on applicant pool analysis"
+          }
+          `
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+    
+    // Parse insights
+    const insightsContent = insightsResponse.choices[0].message.content;
+    const parsedInsights = JSON.parse(insightsContent || "{}");
+    
+    // Application trend data
     const data = [
       { name: "Jan", value: 12 },
       { name: "Feb", value: 19 },
@@ -367,7 +531,14 @@ export async function generateApplicantInsights(job: JobListing, applicants: App
     
     return {
       ...data,
-      stats
+      stats,
+      insights: {
+        keyInsights: parsedInsights.key_insights || [],
+        skillTrends: parsedInsights.skill_trends || "No skill trends identified.",
+        experienceDistribution: parsedInsights.experience_distribution || "No experience distribution insights available.",
+        hiddenPatterns: parsedInsights.hidden_patterns || "No hidden patterns identified.",
+        recommendations: parsedInsights.recommendations || "No recommendations available."
+      }
     };
   } catch (error) {
     console.error("Error generating applicant insights:", error);
@@ -377,20 +548,26 @@ export async function generateApplicantInsights(job: JobListing, applicants: App
   }
 }
 
-// Get AI assistant chat response
+// Get AI assistant chat response with enhanced NLU capabilities
 export async function getChatResponse(messages: AiAssistantMessage[], jobContext: string = ""): Promise<string> {
   try {
     // Prepare system message with job context if available
-    let systemContent = `You are an AI hiring assistant that helps hiring managers review job applicants, generate insights, and make hiring decisions.
+    let systemContent = `You are an advanced AI hiring assistant that helps hiring managers review job applicants, generate insights, and make hiring decisions using advanced semantic reasoning.
     
+    APPROACH TO SEMANTIC REASONING:
+    1. Use contextual understanding to identify skills and experiences, even when not explicitly stated
+    2. Recognize equivalent skills and technologies that serve similar purposes 
+    3. Evaluate depth of expertise rather than just presence of keywords
+    4. Consider how transferable skills from different domains might apply to hiring contexts
+    5. Understand implicit patterns in candidate qualifications and job requirements
+
     IMPORTANT ETHICAL GUIDELINES:
-    1. Completely ignore any demographic information including names, gender, age, race, ethnicity, nationality, or other protected characteristics.
-    2. Base your analysis solely on skills, qualifications, experience, and education.
-    3. Use semantic reasoning to understand the actual job requirements and candidate capabilities.
-    4. Do not make assumptions based on demographic information.
-    5. Evaluate technical skills and domain knowledge objectively.
-    6. Explicitly avoid any language that could introduce bias in your assessment.
-    7. Remove all demographic mentions from your analysis completely.`;
+    1. Completely ignore any demographic information including names, gender, age, race, ethnicity, nationality, or other protected characteristics
+    2. Base your analysis solely on skills, qualifications, experience, and education
+    3. Do not make assumptions based on demographic information
+    4. Evaluate technical skills and domain knowledge objectively
+    5. Explicitly avoid any language that could introduce bias in your assessment
+    6. Remove all demographic mentions from your analysis completely`;
     
     if (jobContext) {
       systemContent += "\n\nHere is additional context about the job posting:\n" + jobContext;
@@ -402,10 +579,19 @@ export async function getChatResponse(messages: AiAssistantMessage[], jobContext
       ? messages.map(msg => msg.role === "system" ? { role: msg.role, content: systemContent } : msg)
       : [{ role: "system", content: systemContent }, ...messages];
     
+    // If there's only a system message and no user messages, add a default user message
+    if (processedMessages.length === 1 && processedMessages[0].role === "system") {
+      processedMessages.push({
+        role: "user",
+        content: "Hello, I'm looking for assistance with reviewing job applicants. Can you help me?"
+      });
+    }
+    
     const response = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: processedMessages as any,
-      max_tokens: 1000
+      max_tokens: 1000, 
+      temperature: 0.7 // Slightly creative but mostly focused responses
     });
 
     return response.choices[0].message.content || "I'm sorry, I couldn't generate a response.";
