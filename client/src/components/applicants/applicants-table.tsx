@@ -19,18 +19,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 
 interface ApplicantsTableProps {
   jobId?: number;
   status?: string;
 }
 
+// Categories for match score ranges
+const MATCH_CATEGORIES = {
+  GREAT_FIT: { min: 95, label: "Great Fit (95%+)" },
+  GOOD_FIT: { min: 51, max: 94, label: "Good Fit (51-94%)" },
+  NOT_GOOD_FIT: { min: 30, max: 50, label: "Not a Good Fit (30-50%)" },
+  POOR_FIT: { max: 29, label: "Poor Fit (<30%)" }
+};
+
 export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps) {
   const [, setLocation] = useLocation();
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [activeMatchTab, setActiveMatchTab] = useState("all");
 
   // Fetch applicants
-  const { data: applicants, isLoading, refetch } = useQuery({
+  const { data: applicants = [], isLoading, refetch } = useQuery<Applicant[]>({
     queryKey: [jobId ? `/api/jobs/${jobId}/applicants${status ? `?status=${status}` : ''}` : `/api/applicants${status ? `?status=${status}` : ''}`],
   });
 
@@ -41,6 +52,35 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
     } catch (error) {
       console.error("Failed to update status:", error);
     }
+  };
+  
+  // Function to filter applicants based on match score category
+  const filterApplicantsByMatchCategory = (category: string): Applicant[] => {
+    if (!applicants.length) return [];
+    
+    // Make a copy of applicants and sort by match score (highest to lowest)
+    const sortedApplicants = [...applicants].sort((a, b) => 
+      (b.matchScore || 0) - (a.matchScore || 0)
+    );
+    
+    if (category === "all") return sortedApplicants;
+    
+    return sortedApplicants.filter(applicant => {
+      const score = applicant.matchScore || 0;
+      
+      switch(category) {
+        case "great-fit":
+          return score >= MATCH_CATEGORIES.GREAT_FIT.min;
+        case "good-fit":
+          return score >= MATCH_CATEGORIES.GOOD_FIT.min && score <= MATCH_CATEGORIES.GOOD_FIT.max;
+        case "not-good-fit":
+          return score >= MATCH_CATEGORIES.NOT_GOOD_FIT.min && score <= MATCH_CATEGORIES.NOT_GOOD_FIT.max;
+        case "poor-fit":
+          return score <= MATCH_CATEGORIES.POOR_FIT.max;
+        default:
+          return true;
+      }
+    });
   };
 
   const columns: ColumnDef<Applicant>[] = [
@@ -227,12 +267,44 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
     return <div>Loading applicants...</div>;
   }
 
+  // Count applicants in each category
+  const greatFitCount = filterApplicantsByMatchCategory("great-fit").length;
+  const goodFitCount = filterApplicantsByMatchCategory("good-fit").length;
+  const notGoodFitCount = filterApplicantsByMatchCategory("not-good-fit").length;
+  const poorFitCount = filterApplicantsByMatchCategory("poor-fit").length;
+  
+  const filteredApplicants = filterApplicantsByMatchCategory(activeMatchTab);
+
   return (
-    <DataTable
-      columns={columns}
-      data={applicants || []}
-      filterColumn="name"
-      filterPlaceholder="Search by name or skill..."
-    />
+    <Card className="shadow-sm">
+      <Tabs value={activeMatchTab} onValueChange={setActiveMatchTab} className="w-full">
+        <TabsList className="grid grid-cols-5 w-full rounded-b-none">
+          <TabsTrigger value="all" className="text-sm">
+            All Applicants ({applicants.length})
+          </TabsTrigger>
+          <TabsTrigger value="great-fit" className="text-sm">
+            Great Fit ({greatFitCount})
+          </TabsTrigger>
+          <TabsTrigger value="good-fit" className="text-sm">
+            Good Fit ({goodFitCount})
+          </TabsTrigger>
+          <TabsTrigger value="not-good-fit" className="text-sm">
+            Not a Good Fit ({notGoodFitCount})
+          </TabsTrigger>
+          <TabsTrigger value="poor-fit" className="text-sm">
+            Poor Fit ({poorFitCount})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value={activeMatchTab} className="m-0 p-0">
+          <DataTable
+            columns={columns}
+            data={filteredApplicants}
+            filterColumn="name"
+            filterPlaceholder="Search by name or skill..."
+          />
+        </TabsContent>
+      </Tabs>
+    </Card>
   );
 }
