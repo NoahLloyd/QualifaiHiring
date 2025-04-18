@@ -147,7 +147,7 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
     },
     {
       accessorKey: "uniqueInsight",
-      header: "What Makes Them Unique",
+      header: "Key Quality",
       cell: ({ row }) => {
         const applicant = row.original;
         
@@ -214,16 +214,18 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
           }
         }
         
-        // Combine elements into a single concise sentence
+        // Create a very short, concise insight (no truncation)
         if (educationInsight) {
-          insight = `A ${trait} with a ${educationInsight} that informs their ${skills[0] || "design"} approach.`;
+          insight = `${trait.charAt(0).toUpperCase() + trait.slice(1)} with ${educationInsight} background.`;
+        } else if (experience > 0) {
+          insight = `${trait.charAt(0).toUpperCase() + trait.slice(1)} with ${experience} years in the field.`;
         } else {
-          insight = `A ${trait} who brings ${experience} years of valuable perspective to ${skills[0] || "design"} challenges.`;
+          insight = `${trait.charAt(0).toUpperCase() + trait.slice(1)} with fresh perspective.`;
         }
         
         return (
           <div className="max-w-md">
-            <div className="text-sm text-neutral-900 truncate">{insight}</div>
+            <div className="text-sm text-neutral-900">{insight}</div>
           </div>
         );
       },
