@@ -146,14 +146,43 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
       },
     },
     {
-      accessorKey: "experience",
-      header: "Experience",
+      accessorKey: "uniqueInsight",
+      header: "What Makes Them Unique",
       cell: ({ row }) => {
-        const experience = row.original.experience || 0;
+        const applicant = row.original;
+        
+        // Create a unique insight based on applicant data
+        let insight = "";
+        const skills = applicant.skills || [];
+        const experience = applicant.experience || 0;
+        
+        if (applicant.aiAnalysis?.strengths?.length > 0) {
+          // Use the first strength from AI analysis if available
+          insight = applicant.aiAnalysis.strengths[0];
+        } else if (skills.length > 0) {
+          // Generate an insight based on skills and experience
+          const topSkills = skills.slice(0, 2).join(" and ");
+          
+          if (experience > 10) {
+            insight = `Exceptional depth of experience (${experience} years) with expertise in ${topSkills}`;
+          } else if (experience > 5) {
+            insight = `Strong mid-career professional with valuable ${topSkills} capabilities`;
+          } else {
+            insight = `Promising talent with fresh perspective on ${topSkills}`;
+          }
+          
+          // Add education context if available
+          if (applicant.education) {
+            insight += ` complemented by ${applicant.education}`;
+          }
+        } else {
+          // Fallback if no data is available
+          insight = `${experience} years of professional experience`;
+        }
+        
         return (
-          <div>
-            <div className="text-sm text-neutral-900">{experience} years</div>
-            <div className="text-sm text-neutral-500">{row.original.education}</div>
+          <div className="max-w-xs">
+            <div className="text-sm text-neutral-900 line-clamp-2">{insight}</div>
           </div>
         );
       },
