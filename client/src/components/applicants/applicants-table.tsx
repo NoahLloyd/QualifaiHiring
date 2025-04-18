@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MoreHorizontal, Eye, FilePlus, Check, X } from "lucide-react";
+import { MoreHorizontal, Eye, FilePlus, Check, X, ArrowLeftRight } from "lucide-react";
 import { AvatarFallbackInitials } from "@/components/ui/avatar-fallback";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Applicant } from "@shared/schema";
@@ -39,6 +39,7 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
   const [, setLocation] = useLocation();
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [activeMatchTab, setActiveMatchTab] = useState("all");
+  const [activeStatusFilter, setActiveStatusFilter] = useState<string | null>(null);
 
   // Fetch applicants
   const { data: applicants = [], isLoading, refetch } = useQuery<Applicant[]>({
@@ -272,12 +273,51 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
       },
     },
     {
+      accessorKey: "recommendation",
+      header: "Why Recommended",
+      cell: ({ row }) => {
+        const applicant = row.original;
+        
+        // Generate a recommendation reason based on applicant data
+        const skills = applicant.skills || [];
+        const matchScore = applicant.matchScore || 0;
+        
+        let recommendation = "";
+        if (matchScore > 95) {
+          recommendation = "Perfect fit for required skills and experience level.";
+        } else if (matchScore > 85) {
+          recommendation = "Strong technical profile with relevant project experience.";
+        } else if (matchScore > 75) {
+          recommendation = "Solid skill foundation with transferable knowledge.";
+        } else if (matchScore > 65) {
+          recommendation = "Has core requirements with growth potential.";
+        } else {
+          recommendation = "Shows adjacent skills that could apply to this role.";
+        }
+        
+        return (
+          <div className="max-w-xs">
+            <div className="text-sm text-neutral-700">{recommendation}</div>
+          </div>
+        );
+      }
+    },
+    {
       id: "actions",
       cell: ({ row }) => {
         const applicant = row.original;
         
         return (
           <div className="flex items-center justify-end space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-primary-600 hover:text-primary-900"
+              onClick={() => setLocation(`/compare?candidates=${applicant.id}`)}
+            >
+              <ArrowLeftRight className="mr-2 h-4 w-4" />
+              Compare
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -346,9 +386,6 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
   const shortlistedCount = applicants.filter(a => a.status === 'shortlisted').length;
   const approvedCount = applicants.filter(a => a.status === 'approved').length;
   const rejectedCount = applicants.filter(a => a.status === 'rejected').length;
-  
-  // State for status-based filtering
-  const [activeStatusFilter, setActiveStatusFilter] = useState<string | null>(null);
   
   // Apply status filter if selected
   let displayedApplicants = filteredApplicants;
