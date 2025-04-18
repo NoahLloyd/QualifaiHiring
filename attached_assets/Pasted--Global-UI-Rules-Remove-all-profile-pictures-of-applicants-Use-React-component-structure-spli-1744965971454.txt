@@ -1,0 +1,106 @@
+🔹 Global / UI Rules
+Remove all profile pictures of applicants.
+
+Use React component structure, split by functional areas.
+
+Ensure layout spacing is consistent and aligned throughout.
+
+Use color-coded statuses: Green = Great Fit, Yellow = Good Fit, Red = Not a Fit.
+
+Add a unified filtering system: Shortlisted, Approved, Rejected, New Applicants.
+
+🔹 Dashboard Overview
+Remove AI avatar. Replace it with charts:
+
+Pie or donut chart for applicant breakdown (e.g., number received today, etc.).
+
+Add Application Trend Insights broken down by job boards (e.g., LinkedIn, Indeed, etc.).
+
+Add summary text blocks like “You’ve received X applicants in the last 24 hours.”
+
+Include today’s interview schedule with a list of candidates.
+
+🔹 Applicant Cards
+No profile image.
+
+Increase candidate name font size.
+
+Add insight summary: “Why this candidate was recommended.”
+
+Add a Compare or Analyze button per card.
+
+Move social links (LinkedIn, GitHub, etc.) into each applicant card.
+
+Each card should show:
+
+Name
+
+Match score
+
+Summary
+
+Highlights via skill bars or charts (education, tech skills, soft skills, etc.)
+
+Add a collaboration thread per applicant for team discussion.
+
+Add a button to assign reviewers or hiring team members to a candidate.
+
+🔹 Filters & Sorting
+Convert current keyword filters into a filter dropdown (keep button).
+
+Remove “All Applicants” and “Poor Fit” as tabs.
+
+Replace with color-coded statuses (green/yellow/red).
+
+Filters should include: Approve, Shortlist, Reject, New Applicants.
+
+Selecting multiple applicants should bring up an action toolbar to bulk approve/shortlist/reject.
+
+🔹 Comparison View
+Limit to 3 candidates max.
+
+Show as side-by-side cards with:
+
+Name
+
+Match score
+
+Summary
+
+Skills vs job requirement match
+
+Add insights: Comparative strengths, weaknesses, and a recommendation for best fit.
+
+🔹 AI & Insights Panel
+Allow hiring manager to ask questions only about the current applicant pool.
+
+Disable any queries about demographic stats (e.g., gender/ethnicity).
+
+Summarize applicant skill gaps: which required skills are met or missing.
+
+Turn messy skills text into word bubble or skill map.
+
+Add bar graph or structured visual for candidate highlights.
+
+🔹 Applicant Detail View
+Replace resume viewer with:
+
+Embedded technical demo video
+
+AI summary of performance: comprehension %, key actions, good vs bad indicators.
+
+Below the video:
+
+Add breakdown: strengths, weaknesses, recommendations.
+
+Include comment thread and social links.
+
+If candidate is rejected, auto-remove from visible shortlist view.
+
+🔹 Top Bar / Header
+Add hiring manager's profile picture.
+
+Add notification bell and team inbox icon.
+
+Remove settings icon.
+

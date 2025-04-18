@@ -8,6 +8,7 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
+  type RowSelectionState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -17,14 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 
@@ -33,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   filterColumn?: string;
   filterPlaceholder?: string;
+  onRowSelectionChange?: (selectedRowIds: Record<string, boolean>) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -40,9 +34,18 @@ export function DataTable<TData, TValue>({
   data,
   filterColumn,
   filterPlaceholder = "Search...",
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  
+  // Effect to notify parent component of row selection changes
+  useEffect(() => {
+    if (onRowSelectionChange) {
+      onRowSelectionChange(rowSelection);
+    }
+  }, [rowSelection, onRowSelectionChange]);
   
   const table = useReactTable({
     data,
@@ -53,9 +56,12 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     state: {
       sorting,
       columnFilters,
+      rowSelection,
     },
   });
 
@@ -120,41 +126,29 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       
-      <div className="flex items-center justify-end space-x-2">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              />
-            </PaginationItem>
-            {Array.from({ length: table.getPageCount() }, (_, i) => i + 1)
-              .slice(
-                Math.max(0, table.getState().pagination.pageIndex - 2),
-                Math.min(
-                  table.getPageCount(),
-                  table.getState().pagination.pageIndex + 3
-                )
-              )
-              .map((pageNum) => (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink
-                    isActive={pageNum === table.getState().pagination.pageIndex + 1}
-                    onClick={() => table.setPageIndex(pageNum - 1)}
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-            <PaginationItem>
-              <PaginationNext
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+      <div className="flex items-center justify-between p-2">
+        <div className="text-sm text-gray-500">
+          {table.getFilteredRowModel().rows.length} total results
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="p-1 rounded border border-gray-300 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-sm">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </span>
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="p-1 rounded border border-gray-300 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

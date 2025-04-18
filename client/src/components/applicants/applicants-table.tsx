@@ -110,14 +110,8 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
         const applicant = row.original;
         return (
           <div className="flex items-center">
-            <Avatar className="h-10 w-10 mr-3">
-              <AvatarImage src={applicant.profilePicUrl || ""} alt={applicant.name} />
-              <AvatarFallback>
-                <AvatarFallbackInitials name={applicant.name} />
-              </AvatarFallback>
-            </Avatar>
             <div>
-              <div className="text-sm font-medium text-neutral-900">{applicant.name}</div>
+              <div className="text-base font-medium text-neutral-900">{applicant.name}</div>
               <div className="text-sm text-neutral-500">{applicant.email}</div>
             </div>
           </div>
@@ -347,36 +341,126 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
   
   const filteredApplicants = filterApplicantsByMatchCategory(activeMatchTab);
 
+  // Count applicants by status
+  const newCount = applicants.filter(a => a.status === 'new').length;
+  const shortlistedCount = applicants.filter(a => a.status === 'shortlisted').length;
+  const approvedCount = applicants.filter(a => a.status === 'approved').length;
+  const rejectedCount = applicants.filter(a => a.status === 'rejected').length;
+  
+  // State for status-based filtering
+  const [activeStatusFilter, setActiveStatusFilter] = useState<string | null>(null);
+  
+  // Apply status filter if selected
+  let displayedApplicants = filteredApplicants;
+  if (activeStatusFilter) {
+    displayedApplicants = displayedApplicants.filter(a => a.status === activeStatusFilter);
+  }
+  
   return (
-    <Card className="shadow-sm">
-      <Tabs value={activeMatchTab} onValueChange={setActiveMatchTab} className="w-full">
-        <TabsList className="grid grid-cols-5 w-full rounded-b-none">
-          <TabsTrigger value="all" className="text-sm">
-            All Applicants ({applicants.length})
-          </TabsTrigger>
-          <TabsTrigger value="great-fit" className="text-sm">
-            Great Fit ({greatFitCount})
-          </TabsTrigger>
-          <TabsTrigger value="good-fit" className="text-sm">
-            Good Fit ({goodFitCount})
-          </TabsTrigger>
-          <TabsTrigger value="not-good-fit" className="text-sm">
-            Not a Good Fit ({notGoodFitCount})
-          </TabsTrigger>
-          <TabsTrigger value="poor-fit" className="text-sm">
-            Poor Fit ({poorFitCount})
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value={activeMatchTab} className="m-0 p-0">
-          <DataTable
-            columns={columns}
-            data={filteredApplicants}
-            filterColumn="name"
-            filterPlaceholder="Search by name or skill..."
-          />
-        </TabsContent>
-      </Tabs>
-    </Card>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="flex space-x-2">
+          <Button 
+            size="sm" 
+            variant={activeStatusFilter === null ? "default" : "outline"}
+            onClick={() => setActiveStatusFilter(null)}
+          >
+            All
+          </Button>
+          <Button 
+            size="sm" 
+            variant={activeStatusFilter === 'new' ? "default" : "outline"}
+            onClick={() => setActiveStatusFilter('new')}
+            className="bg-neutral-100 text-neutral-800 hover:bg-neutral-200 hover:text-neutral-900 border-neutral-200"
+          >
+            New ({newCount})
+          </Button>
+          <Button 
+            size="sm" 
+            variant={activeStatusFilter === 'shortlisted' ? "default" : "outline"}
+            onClick={() => setActiveStatusFilter('shortlisted')}
+            className="bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900 border-blue-200"
+          >
+            Shortlisted ({shortlistedCount})
+          </Button>
+          <Button 
+            size="sm" 
+            variant={activeStatusFilter === 'approved' ? "default" : "outline"}
+            onClick={() => setActiveStatusFilter('approved')}
+            className="bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 border-green-200"
+          >
+            Approved ({approvedCount})
+          </Button>
+          <Button 
+            size="sm" 
+            variant={activeStatusFilter === 'rejected' ? "default" : "outline"}
+            onClick={() => setActiveStatusFilter('rejected')}
+            className="bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 border-red-200"
+          >
+            Rejected ({rejectedCount})
+          </Button>
+        </div>
+        {selectedRows.length > 0 && (
+          <div className="flex space-x-2">
+            <Button size="sm" variant="outline" onClick={() => {
+              selectedRows.forEach(id => handleStatusChange(id, 'shortlisted'));
+              setSelectedRows([]);
+            }}>
+              <Check className="mr-2 h-4 w-4" />
+              Shortlist Selected
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              selectedRows.forEach(id => handleStatusChange(id, 'approved'));
+              setSelectedRows([]);
+            }}>
+              <Check className="mr-2 h-4 w-4 text-green-600" />
+              Approve Selected
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => {
+              selectedRows.forEach(id => handleStatusChange(id, 'rejected'));
+              setSelectedRows([]);
+            }}>
+              <X className="mr-2 h-4 w-4 text-red-600" />
+              Reject Selected
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      <Card className="shadow-sm">
+        <Tabs value={activeMatchTab} onValueChange={setActiveMatchTab} className="w-full">
+          <TabsList className="grid grid-cols-4 w-full rounded-b-none">
+            <TabsTrigger value="all" className="text-sm">
+              All Applicants ({applicants.length})
+            </TabsTrigger>
+            <TabsTrigger value="great-fit" className="text-sm bg-green-50 data-[state=active]:bg-green-100 data-[state=active]:text-green-900">
+              Great Fit ({greatFitCount})
+            </TabsTrigger>
+            <TabsTrigger value="good-fit" className="text-sm bg-yellow-50 data-[state=active]:bg-yellow-100 data-[state=active]:text-yellow-900">
+              Good Fit ({goodFitCount})
+            </TabsTrigger>
+            <TabsTrigger value="not-good-fit" className="text-sm bg-red-50 data-[state=active]:bg-red-100 data-[state=active]:text-red-900">
+              Not a Good Fit ({notGoodFitCount})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value={activeMatchTab} className="m-0 p-0">
+            <DataTable
+              columns={columns}
+              data={displayedApplicants}
+              filterColumn="name"
+              filterPlaceholder="Search by name or skill..."
+              onRowSelectionChange={(rows: Record<string, boolean>) => {
+                setSelectedRows(
+                  Object.keys(rows)
+                    .filter(key => rows[key])
+                    .map(key => parseInt(key, 10))
+                );
+              }}
+            />
+          </TabsContent>
+        </Tabs>
+      </Card>
+    </div>
   );
 }
