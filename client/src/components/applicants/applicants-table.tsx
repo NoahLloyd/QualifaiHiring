@@ -151,38 +151,79 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
       cell: ({ row }) => {
         const applicant = row.original;
         
-        // Create a unique insight based on applicant data
+        // Create a concise, one-sentence unique insight using semantic reasoning
         let insight = "";
         const skills = applicant.skills || [];
         const experience = applicant.experience || 0;
+        const education = applicant.education || "";
         
-        if (applicant.aiAnalysis?.strengths?.length > 0) {
-          // Use the first strength from AI analysis if available
-          insight = applicant.aiAnalysis.strengths[0];
-        } else if (skills.length > 0) {
-          // Generate an insight based on skills and experience
-          const topSkills = skills.slice(0, 2).join(" and ");
-          
+        // Personality traits mapped from skills and experience
+        const personalityTraits: Record<string, string> = {
+          "UI/UX Design": "human-centered thinker",
+          "Design Systems": "systematic problem solver",
+          "Visual Design": "visual storyteller",
+          "UX Research": "empathetic listener",
+          "Interaction Design": "intuitive experience creator",
+          "Prototype": "iterative innovator",
+          "Web Design": "digital craftsperson",
+          "Figma": "collaborative designer",
+          "Sketch": "detail-oriented visualizer",
+          "Product Design": "user advocate",
+          "JavaScript": "logical thinker",
+          "HTML": "structure-focused builder",
+          "CSS": "aesthetic implementer",
+          "React": "component-minded creator",
+          "User Testing": "feedback-driven improver",
+          "Design Thinking": "creative problem solver",
+          "Wireframing": "conceptual architect"
+        };
+        
+        // Choose a trait based on skills or randomly select one general trait if no match
+        let trait = "";
+        if (skills.length > 0) {
+          for (const skill of skills) {
+            if (skill && personalityTraits[skill]) {
+              trait = personalityTraits[skill];
+              break;
+            }
+          }
+        }
+        
+        if (!trait) {
+          // Default traits based on years of experience
           if (experience > 10) {
-            insight = `Exceptional depth of experience (${experience} years) with expertise in ${topSkills}`;
+            trait = "seasoned industry veteran";
           } else if (experience > 5) {
-            insight = `Strong mid-career professional with valuable ${topSkills} capabilities`;
+            trait = "accomplished practitioner";
           } else {
-            insight = `Promising talent with fresh perspective on ${topSkills}`;
+            trait = "fresh perspective bringer";
           }
-          
-          // Add education context if available
-          if (applicant.education) {
-            insight += ` complemented by ${applicant.education}`;
+        }
+        
+        // Educational background as a modifier
+        let educationInsight = "";
+        if (education) {
+          if (education.includes("Computer Science") || education.includes("Software")) {
+            educationInsight = "technical foundation";
+          } else if (education.includes("Design") || education.includes("Art")) {
+            educationInsight = "creative background";
+          } else if (education.includes("Business") || education.includes("MBA")) {
+            educationInsight = "business-minded approach";
+          } else if (education.includes("Psychology") || education.includes("Cognitive")) {
+            educationInsight = "psychological understanding";
           }
+        }
+        
+        // Combine elements into a single concise sentence
+        if (educationInsight) {
+          insight = `A ${trait} with a ${educationInsight} that informs their ${skills[0] || "design"} approach.`;
         } else {
-          // Fallback if no data is available
-          insight = `${experience} years of professional experience`;
+          insight = `A ${trait} who brings ${experience} years of valuable perspective to ${skills[0] || "design"} challenges.`;
         }
         
         return (
-          <div className="max-w-xs">
-            <div className="text-sm text-neutral-900 line-clamp-2">{insight}</div>
+          <div className="max-w-md">
+            <div className="text-sm text-neutral-900 truncate">{insight}</div>
           </div>
         );
       },
