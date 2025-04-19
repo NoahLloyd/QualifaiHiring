@@ -118,7 +118,7 @@ export default function Dashboard() {
                 className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => setLocation(`/jobs/${job.id}`)}
               >
-                <div className="p-5">
+                <div className="p-5 pb-2">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium text-lg mb-1">{job.title}</h3>
@@ -132,18 +132,19 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  <div className="flex mt-5 flex-wrap gap-2">
-                    <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
-                      {job.applicantsCount || (index === 0 ? "150" : index === 1 ? "100" : "50")} Applicants
-                    </Badge>
-                    <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full">
-                      {job.team || (index === 0 ? "Design Team" : index === 1 ? "QA Team" : "Engineering Team")}
-                    </Badge>
+                  <div className="flex justify-between mt-5 items-center">
+                    <div className="flex gap-2">
+                      <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                        {job.applicantsCount || (index === 0 ? "150" : index === 1 ? "100" : "50")} Applicants
+                      </Badge>
+                      <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full">
+                        {job.team || (index === 0 ? "Design Team" : index === 1 ? "QA Team" : "Engineering Team")}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "4/17/2025"}
+                    </div>
                   </div>
-                </div>
-                
-                <div className="text-xs text-gray-500 px-5 py-2 bg-gray-50 border-t border-gray-200 flex justify-end">
-                  Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "4/17/2025"}
                 </div>
               </div>
             ))
