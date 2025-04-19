@@ -179,13 +179,15 @@ export default function Dashboard() {
           <h3 className="font-medium mb-4">Workload Distribution</h3>
           
           <div className="space-y-4">
-            {mockTeamMembers.map(member => (
+            {mockTeamMembers.map((member, index) => (
               <div key={member.id} className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full mr-3">
-                    <svg className="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
-                    </svg>
+                    <img 
+                      src={`https://randomuser.me/api/portraits/${index === 0 ? 'women' : 'men'}/${index + 10}.jpg`} 
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="font-medium">{member.name}</div>
