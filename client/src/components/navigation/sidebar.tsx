@@ -1,5 +1,8 @@
 import { useLocation, Link } from "wouter";
-import { Home, Briefcase, Users, CheckSquare, X, Settings, LifeBuoy } from "lucide-react";
+import { 
+  Home, Briefcase, Users, MessagesSquare, Search, User, FileText,
+  BarChart2, Cog, HelpCircle, X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
@@ -19,10 +22,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Company Logo */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-200">
         <div className="flex items-center">
-          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary-500 text-white">
-            <Users className="w-5 h-5" />
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10z" />
+              <path d="M12 12v6" />
+              <path d="M12 8v.01" />
+            </svg>
           </div>
-          <span className="ml-2 text-lg font-semibold text-neutral-800">ApplicantAI</span>
+          <span className="ml-2 text-lg font-semibold text-neutral-800">Snapchat Qualifai</span>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden">
           <X className="w-6 h-6 text-neutral-500" />
@@ -30,150 +37,127 @@ export default function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="px-2 py-4">
-        <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
-          Dashboard
+      <nav className="px-4 py-4">
+        <div className="mb-4 text-xs font-medium uppercase tracking-wider text-neutral-500">
+          DASHBOARD
         </div>
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/">
-            <Home className="w-5 h-5 mr-2" />
-            Overview
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/jobs")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/jobs">
-            <Briefcase className="w-5 h-5 mr-2" />
-            Job Listings
-          </Link>
-        </Button>
 
-        <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
-          Applicants
-        </div>
-        
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/applicants") && !isActive("/applicants/shortlisted") && !isActive("/applicants/approved")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/applicants">
-            <Users className="w-5 h-5 mr-2" />
-            All Applicants
-          </Link>
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-between items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/applicants/shortlisted")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/applicants/shortlisted">
+        <div className="space-y-1">
+          <div className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+            isActive("/") ? "text-blue-700 font-medium" : "text-neutral-700"
+          }`} onClick={() => window.location.href = "/"}>
+            <Home className="w-5 h-5 mr-3" />
+            Overview
+          </div>
+
+          <div className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+            isActive("/jobs") ? "text-blue-700 font-medium" : "text-neutral-700"
+          }`} onClick={() => window.location.href = "/jobs"}>
+            <Briefcase className="w-5 h-5 mr-3" />
+            Job Listings
+          </div>
+
+          <div className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+            isActive("/meetings") ? "text-blue-700 font-medium" : "text-neutral-700"
+          }`} onClick={() => window.location.href = "/meetings"}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Meetings
+          </div>
+
+          <div className={`flex items-center justify-between px-2 py-2 text-sm rounded-md cursor-pointer ${
+            isActive("/messages") ? "text-blue-700 font-medium" : "text-neutral-700"
+          }`} onClick={() => window.location.href = "/messages"}>
             <div className="flex items-center">
-              <Users className="w-5 h-5 mr-2" />
-              Shortlisted
+              <MessagesSquare className="w-5 h-5 mr-3" />
+              Messages
             </div>
-            <span className="flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full bg-primary-100 text-primary-800">
+            <span className="flex items-center justify-center w-5 h-5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+              3
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-8 mb-4 text-xs font-medium uppercase tracking-wider text-neutral-500">
+          APPLICANTS
+        </div>
+
+        <div className="space-y-1">
+          <div 
+            className={`flex items-center justify-between px-2 py-2 text-sm rounded-md cursor-pointer ${
+              isActive("/applicants/review") ? "text-blue-700 font-medium" : "text-neutral-700"
+            }`}
+            onClick={() => window.location.href = "/applicants/review"}
+          >
+            <div className="flex items-center">
+              <Search className="w-5 h-5 mr-3" />
+              Needs review
+            </div>
+            <span className="flex items-center justify-center w-5 h-5 text-xs font-medium rounded-full bg-red-100 text-red-800">
               14
             </span>
-          </Link>
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/applicants/approved")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/applicants/approved">
-            <CheckSquare className="w-5 h-5 mr-2" />
-            Approved
-          </Link>
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/compare")
-              ? "bg-primary-50 text-primary-700 border border-primary-200"
-              : "text-neutral-700 hover:bg-neutral-100 border border-dashed border-neutral-200"
-          }`}
-          asChild
-        >
-          <Link href="/compare">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-              <path d="M6 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-              <path d="M18 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-              <path d="M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-              <path d="M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>
-              <path d="M15 5h-3a9 9 0 0 0-9 9v0"/>
-              <path d="M21 5h-3a9 9 0 0 0-6 2.3"/>
-              <path d="M3 17v-2"/>
-              <path d="M21 17v-2"/>
-            </svg>
-            Compare Candidates
-          </Link>
-        </Button>
+          </div>
 
-        <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">
-          Settings
+          <div 
+            className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+              isActive("/applicants/interviewing") ? "text-blue-700 font-medium" : "text-neutral-700"
+            }`}
+            onClick={() => window.location.href = "/applicants/interviewing"}
+          >
+            <User className="w-5 h-5 mr-3" />
+            Interviewing
+          </div>
+
+          <div 
+            className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+              isActive("/applicants/referrals") ? "text-blue-700 font-medium" : "text-neutral-700"
+            }`}
+            onClick={() => window.location.href = "/applicants/referrals"}
+          >
+            <FileText className="w-5 h-5 mr-3" />
+            Referrals
+          </div>
+
+          <div 
+            className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+              isActive("/compare") ? "text-blue-700 font-medium" : "text-neutral-700"
+            }`}
+            onClick={() => window.location.href = "/compare"}
+          >
+            <BarChart2 className="w-5 h-5 mr-3" />
+            AI Compare
+          </div>
         </div>
-        
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/settings/ai")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/settings/ai">
-            <Settings className="w-5 h-5 mr-2" />
-            AI Settings
-          </Link>
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={`flex w-full justify-start items-center px-3 py-2 mb-1 text-sm font-medium rounded-md ${
-            isActive("/help")
-              ? "bg-primary-50 text-primary-700"
-              : "text-neutral-700 hover:bg-neutral-100"
-          }`}
-          asChild
-        >
-          <Link href="/help">
-            <LifeBuoy className="w-5 h-5 mr-2" />
+
+        <div className="mt-8 mb-4 text-xs font-medium uppercase tracking-wider text-neutral-500">
+          SETTINGS
+        </div>
+
+        <div className="space-y-1">
+          <div 
+            className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+              isActive("/settings") ? "text-blue-700 font-medium" : "text-neutral-700"
+            }`}
+            onClick={() => window.location.href = "/settings"}
+          >
+            <Cog className="w-5 h-5 mr-3" />
+            Settings
+          </div>
+
+          <div 
+            className={`flex items-center px-2 py-2 text-sm rounded-md cursor-pointer ${
+              isActive("/help") ? "text-blue-700 font-medium" : "text-neutral-700"
+            }`}
+            onClick={() => window.location.href = "/help"}
+          >
+            <HelpCircle className="w-5 h-5 mr-3" />
             Help & Support
-          </Link>
-        </Button>
+          </div>
+        </div>
       </nav>
     </>
   );
