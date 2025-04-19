@@ -28,8 +28,15 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         <header className="bg-white border-b border-gray-200">
           <div className="flex items-center justify-end h-16 px-6">
             <div className="flex items-center">
-              <span className="text-sm font-medium mr-2">Welcome back, Katy!</span>
-              <UserNav />
+              <span className="text-3xl font-medium mr-3">Welcome back, Katy!</span>
+              <img 
+                src="https://randomuser.me/api/portraits/women/44.jpg" 
+                alt="Katy" 
+                className="h-12 w-12 rounded-full object-cover"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 ml-1 text-gray-800">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
             </div>
           </div>
         </header>
