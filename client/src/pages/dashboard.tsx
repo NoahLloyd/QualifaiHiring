@@ -45,18 +45,20 @@ export default function Dashboard() {
               </svg>
             </div>
           </div>
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between mt-6">
             <div>
               <div className="text-5xl font-bold">50</div>
               <div className="text-gray-500 mt-1">to stay on track</div>
             </div>
-            <Button 
-              variant="outline" 
-              className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 rounded-full px-6 h-12"
-              onClick={() => setLocation('/applicants?status=new')}
-            >
-              Review
-            </Button>
+            <div className="self-end">
+              <Button 
+                variant="outline" 
+                className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 rounded-full px-6"
+                onClick={() => setLocation('/applicants?status=new')}
+              >
+                Review
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -72,18 +74,20 @@ export default function Dashboard() {
               </svg>
             </div>
           </div>
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between mt-6">
             <div>
               <div className="text-5xl font-bold">3</div>
               <div className="text-gray-500 mt-1">scheduled interviews</div>
             </div>
-            <Button 
-              variant="outline" 
-              className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 rounded-full px-6 h-12"
-              onClick={() => setLocation('/calendar')}
-            >
-              View
-            </Button>
+            <div className="self-end">
+              <Button 
+                variant="outline" 
+                className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 rounded-full px-6"
+                onClick={() => setLocation('/calendar')}
+              >
+                View
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -97,18 +101,20 @@ export default function Dashboard() {
               </svg>
             </div>
           </div>
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex justify-between mt-6">
             <div>
               <div className="text-5xl font-bold">7</div>
               <div className="text-gray-500 mt-1">pending responses</div>
             </div>
-            <Button 
-              variant="outline" 
-              className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 rounded-full px-6 h-12"
-              onClick={() => setLocation('/messages')}
-            >
-              Messages
-            </Button>
+            <div className="self-end">
+              <Button 
+                variant="outline" 
+                className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 rounded-full px-6"
+                onClick={() => setLocation('/messages')}
+              >
+                Messages
+              </Button>
+            </div>
           </div>
         </div>
       </div>
