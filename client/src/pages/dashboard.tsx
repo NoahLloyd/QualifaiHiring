@@ -152,52 +152,52 @@ export default function Dashboard() {
       </div>
       
       {/* Team Overview */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">Team Overview</h2>
+      <div className="rounded-lg bg-white p-6 border border-gray-200 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Team Overview</h2>
+        </div>
         
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-5">
-            <div className="flex justify-between mb-1">
-              <h3 className="font-medium flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-green-600" />
-                Reviews this week
-              </h3>
-              <Badge className="bg-gray-100 text-gray-700 border-0">
-                42 Applicants
-              </Badge>
-            </div>
-            
-            <div className="mb-6">
-              <div className="flex justify-between text-sm mb-1">
-                <span>Goal: 15 reviews/day - Almost there!</span>
-                <span>{mockReviewPercent}%</span>
-              </div>
-              <Progress value={mockReviewPercent} className="h-2 bg-gray-200" indicatorClassName="bg-green-600" />
-            </div>
-            
-            <h3 className="font-medium mb-4">Workload Distribution</h3>
-            
-            <div className="space-y-4">
-              {mockTeamMembers.map(member => (
-                <div key={member.id} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-medium text-sm mr-3">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <div className="font-medium">{member.name}</div>
-                      <div className="text-sm text-gray-500">{member.role}</div>
-                    </div>
-                  </div>
-                  <div className="text-sm">
-                    {member.applicantsHandling} Applicants
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div>
+          <div className="flex justify-between mb-1">
+            <h3 className="font-medium flex items-center">
+              <Clock className="h-4 w-4 mr-2 text-green-600" />
+              Reviews this week
+            </h3>
+            <Badge className="bg-gray-100 text-gray-700 border-0">
+              42 Applicants
+            </Badge>
           </div>
           
-          <div className="px-5 py-3 border-t border-gray-200 bg-gray-50">
+          <div className="mb-6">
+            <div className="flex justify-between text-sm mb-1">
+              <span>Goal: 15 reviews/day - Almost there!</span>
+              <span>{mockReviewPercent}%</span>
+            </div>
+            <Progress value={mockReviewPercent} className="h-2 bg-gray-200" indicatorClassName="bg-green-600" />
+          </div>
+          
+          <h3 className="font-medium mb-4">Workload Distribution</h3>
+          
+          <div className="space-y-4">
+            {mockTeamMembers.map(member => (
+              <div key={member.id} className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-medium text-sm mr-3">
+                    {member.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <div className="font-medium">{member.name}</div>
+                    <div className="text-sm text-gray-500">{member.role}</div>
+                  </div>
+                </div>
+                <div className="text-sm">
+                  {member.applicantsHandling} Applicants
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-6 pt-4 border-t border-gray-200">
             <Button 
               variant="ghost" 
               className="w-full justify-center text-gray-700 hover:text-gray-900 hover:bg-gray-100"
