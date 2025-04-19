@@ -33,76 +33,70 @@ export default function Dashboard() {
       
       {/* Overview Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border border-gray-200 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center mb-4">
-              <User className="h-5 w-5 text-amber-500 mr-2" />
-              <h3 className="text-gray-700 font-medium">Applicants to Review</h3>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center mb-4">
+            <User className="h-5 w-5 text-amber-500 mr-2" />
+            <h3 className="text-gray-700 font-medium">Applicants to Review</h3>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-4xl font-bold">50</span>
+            <span className="text-sm text-gray-500">to stay on track</span>
+            <div className="mt-auto pt-4">
+              <Button 
+                variant="outline" 
+                className="bg-white text-gray-700 border-gray-300"
+                onClick={() => setLocation('/applicants?status=new')}
+              >
+                Review
+              </Button>
             </div>
-            <div className="flex flex-col">
-              <span className="text-4xl font-bold">50</span>
-              <span className="text-sm text-gray-500">to stay on track</span>
-              <div className="mt-auto pt-4">
-                <Button 
-                  variant="outline" 
-                  className="bg-white text-gray-700 border-gray-300"
-                  onClick={() => setLocation('/applicants?status=new')}
-                >
-                  Review
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         
-        <Card className="border border-gray-200 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center mb-4">
-              <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-              <h3 className="text-gray-700 font-medium">Today's Meetings</h3>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center mb-4">
+            <Calendar className="h-5 w-5 text-blue-500 mr-2" />
+            <h3 className="text-gray-700 font-medium">Today's Meetings</h3>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-4xl font-bold">3</span>
+            <span className="text-sm text-gray-500">scheduled interviews</span>
+            <div className="mt-auto pt-4">
+              <Button 
+                variant="outline" 
+                className="bg-white text-gray-700 border-gray-300"
+                onClick={() => setLocation('/calendar')}
+              >
+                View
+              </Button>
             </div>
-            <div className="flex flex-col">
-              <span className="text-4xl font-bold">3</span>
-              <span className="text-sm text-gray-500">scheduled interviews</span>
-              <div className="mt-auto pt-4">
-                <Button 
-                  variant="outline" 
-                  className="bg-white text-gray-700 border-gray-300"
-                  onClick={() => setLocation('/calendar')}
-                >
-                  View
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         
-        <Card className="border border-gray-200 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center mb-4">
-              <Send className="h-5 w-5 text-orange-500 mr-2" />
-              <h3 className="text-gray-700 font-medium">Follow-ups</h3>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center mb-4">
+            <Send className="h-5 w-5 text-orange-500 mr-2" />
+            <h3 className="text-gray-700 font-medium">Follow-ups</h3>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-4xl font-bold">7</span>
+            <span className="text-sm text-gray-500">pending responses</span>
+            <div className="mt-auto pt-4">
+              <Button 
+                variant="outline" 
+                className="bg-white text-gray-700 border-gray-300"
+                onClick={() => setLocation('/messages')}
+              >
+                Messages
+              </Button>
             </div>
-            <div className="flex flex-col">
-              <span className="text-4xl font-bold">7</span>
-              <span className="text-sm text-gray-500">pending responses</span>
-              <div className="mt-auto pt-4">
-                <Button 
-                  variant="outline" 
-                  className="bg-white text-gray-700 border-gray-300"
-                  onClick={() => setLocation('/messages')}
-                >
-                  Messages
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
       
       {/* Active Job Listings */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
+      <div className="rounded-lg bg-white p-6 border border-gray-200 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Active Job Listings</h2>
           <Button 
             size="sm" 
@@ -114,55 +108,55 @@ export default function Dashboard() {
           </Button>
         </div>
         
-        <Card className="border border-gray-200 p-0 shadow-sm">
-          <CardContent className="p-0">
-            <div className="space-y-0 divide-y divide-gray-200">
-              {jobsLoading ? (
-                <div className="p-6">Loading job listings...</div>
-              ) : (
-                jobListings.map((job: any) => (
-                  <div key={job.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setLocation(`/jobs/${job.id}`)}>
-                    <div className="p-5">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-lg mb-1">{job.title}</h3>
-                          <p className="text-gray-600 text-sm line-clamp-2">
-                            {job.description}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge className="bg-green-100 text-green-700 border-0">Active</Badge>
-                          <Badge className="bg-yellow-100 text-yellow-800 border-0">1 week</Badge>
-                        </div>
-                      </div>
-                      
-                      <div className="flex mt-5 flex-wrap gap-2">
-                        <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
-                          {job.applicantsCount || 150} Applicants
-                        </Badge>
-                        <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full">
-                          {job.team || "Design Team"}
-                        </Badge>
-                      </div>
+        <div className="space-y-4">
+          {jobsLoading ? (
+            <div className="p-6 text-center">Loading job listings...</div>
+          ) : (
+            jobListings.map((job: any, index: number) => (
+              <div 
+                key={job.id} 
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setLocation(`/jobs/${job.id}`)}
+              >
+                <div className="p-5">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-lg mb-1">{job.title}</h3>
+                      <p className="text-gray-600 text-sm line-clamp-2">
+                        {job.description}
+                      </p>
                     </div>
-                    
-                    <div className="text-xs text-gray-500 px-5 py-2 bg-gray-50 border-t border-gray-200 flex justify-end">
-                      Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "4/17/2025"}
+                    <div className="flex gap-2">
+                      <Badge className="bg-green-100 text-green-700 border-0">Active</Badge>
+                      <Badge className="bg-yellow-100 text-yellow-800 border-0">1 week</Badge>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  
+                  <div className="flex mt-5 flex-wrap gap-2">
+                    <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                      {job.applicantsCount || (index === 0 ? "150" : index === 1 ? "100" : "50")} Applicants
+                    </Badge>
+                    <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full">
+                      {job.team || (index === 0 ? "Design Team" : index === 1 ? "QA Team" : "Engineering Team")}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 px-5 py-2 bg-gray-50 border-t border-gray-200 flex justify-end">
+                  Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "4/17/2025"}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
       
       {/* Team Overview */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold">Team Overview</h2>
         
-        <Card className="border border-gray-200">
-          <CardContent className="p-5">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="p-5">
             <div className="flex justify-between mb-1">
               <h3 className="font-medium flex items-center">
                 <Clock className="h-4 w-4 mr-2 text-green-600" />
@@ -201,7 +195,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-          </CardContent>
+          </div>
           
           <div className="px-5 py-3 border-t border-gray-200 bg-gray-50">
             <Button 
@@ -212,7 +206,7 @@ export default function Dashboard() {
               View Team Dashboard <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
