@@ -114,45 +114,47 @@ export default function Dashboard() {
           </Button>
         </div>
         
-        <div className="space-y-4">
-          {jobsLoading ? (
-            <div>Loading job listings...</div>
-          ) : (
-            jobListings.map((job: any) => (
-              <Card key={job.id} className="border border-gray-200 hover:shadow-md transition-shadow overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="p-5">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-lg mb-1">{job.title}</h3>
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {job.description}
-                        </p>
+        <Card className="border border-gray-200 p-0 shadow-sm">
+          <CardContent className="p-0">
+            <div className="space-y-0 divide-y divide-gray-200">
+              {jobsLoading ? (
+                <div className="p-6">Loading job listings...</div>
+              ) : (
+                jobListings.map((job: any) => (
+                  <div key={job.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setLocation(`/jobs/${job.id}`)}>
+                    <div className="p-5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg mb-1">{job.title}</h3>
+                          <p className="text-gray-600 text-sm line-clamp-2">
+                            {job.description}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge className="bg-green-100 text-green-700 border-0">Active</Badge>
+                          <Badge className="bg-yellow-100 text-yellow-800 border-0">1 week</Badge>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Badge className="bg-green-100 text-green-700 border-0">Active</Badge>
-                        <Badge className="bg-yellow-100 text-yellow-800 border-0">1 week</Badge>
+                      
+                      <div className="flex mt-5 flex-wrap gap-2">
+                        <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
+                          {job.applicantsCount || 150} Applicants
+                        </Badge>
+                        <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full">
+                          {job.team || "Design Team"}
+                        </Badge>
                       </div>
                     </div>
                     
-                    <div className="flex mt-5 flex-wrap gap-2">
-                      <Badge className="bg-blue-100 text-blue-700 border-0 rounded-full">
-                        {job.applicantsCount || 150} Applicants
-                      </Badge>
-                      <Badge className="bg-gray-100 text-gray-700 border-0 rounded-full">
-                        {job.team || "Design Team"}
-                      </Badge>
+                    <div className="text-xs text-gray-500 px-5 py-2 bg-gray-50 border-t border-gray-200 flex justify-end">
+                      Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "4/17/2025"}
                     </div>
                   </div>
-                  
-                  <div className="text-xs text-gray-500 px-5 py-2 bg-gray-50 border-t border-gray-200 flex justify-end">
-                    Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "4/17/2025"}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       {/* Team Overview */}
