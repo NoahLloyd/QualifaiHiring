@@ -1,24 +1,14 @@
 import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DataTable } from "@/components/ui/data-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, FilePlus, Check, X, ArrowLeftRight, Download } from "lucide-react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { Eye, Check, X, SlidersHorizontal } from "lucide-react";
 import type { Applicant } from "@shared/schema";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface ApplicantsTableProps {
   jobId?: number;
@@ -27,16 +17,16 @@ interface ApplicantsTableProps {
 
 // Categories for match score ranges
 const MATCH_CATEGORIES = {
-  GREAT_FIT: { min: 95, label: "Great Fit (95%+)" },
-  GOOD_FIT: { min: 51, max: 94, label: "Good Fit (51-94%)" },
-  NOT_GOOD_FIT: { min: 30, max: 50, label: "Not a Good Fit (30-50%)" }
+  GREAT_FIT: { min: 95, label: "Great Fit" },
+  GOOD_FIT: { min: 51, max: 94, label: "Good Fit" },
+  NOT_GOOD_FIT: { min: 30, max: 50, label: "Not a Fit" }
 };
 
 export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps) {
   const [, setLocation] = useLocation();
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [activeMatchTab, setActiveMatchTab] = useState("all");
-  const [activeStatusFilter, setActiveStatusFilter] = useState<string | null>(null);
+  const [filterText, setFilterText] = useState("");
 
   // Fetch applicants
   const { data: applicants = [], isLoading, refetch } = useQuery<Applicant[]>({
@@ -50,6 +40,10 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
     } catch (error) {
       console.error("Failed to update status:", error);
     }
+  };
+
+  const viewApplicant = (id: number) => {
+    setLocation(`/applicants/${id}`);
   };
   
   // Function to filter applicants based on match score category
@@ -70,307 +64,14 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
         case "great-fit":
           return score >= MATCH_CATEGORIES.GREAT_FIT.min;
         case "good-fit":
-          return score >= MATCH_CATEGORIES.GOOD_FIT.min && score <= MATCH_CATEGORIES.GOOD_FIT.max;
+          return score >= MATCH_CATEGORIES.GOOD_FIT.min && score <= (MATCH_CATEGORIES.GOOD_FIT.max || 100);
         case "not-good-fit":
-          return score >= MATCH_CATEGORIES.NOT_GOOD_FIT.min && score <= MATCH_CATEGORIES.NOT_GOOD_FIT.max;
+          return score >= MATCH_CATEGORIES.NOT_GOOD_FIT.min && score <= (MATCH_CATEGORIES.NOT_GOOD_FIT.max || 100);
         default:
           return true;
       }
     });
   }, [applicants]);
-
-  const columns: ColumnDef<Applicant>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "name",
-      header: "Candidate",
-      cell: ({ row }) => {
-        const applicant = row.original;
-        return (
-          <div className="flex items-center">
-            <div>
-              <div className="text-base font-medium text-neutral-900">{applicant.name}</div>
-              <div className="text-sm text-neutral-500">{applicant.email}</div>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "skills",
-      header: "Skills",
-      cell: ({ row }) => {
-        const skills = row.original.skills || [];
-        return (
-          <div className="flex flex-wrap gap-1 max-w-xs">
-            {skills.slice(0, 3).map((skill, i) => (
-              <Badge key={i} variant="outline" className="bg-primary-50 text-primary-700 hover:bg-primary-100 border-primary-100">
-                {skill}
-              </Badge>
-            ))}
-            {skills.length > 3 && (
-              <Badge variant="outline" className="bg-neutral-50 text-neutral-700">
-                +{skills.length - 3} more
-              </Badge>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "uniqueInsight",
-      header: "Key Quality",
-      cell: ({ row }) => {
-        const applicant = row.original;
-        
-        // Create a concise, one-sentence unique insight using semantic reasoning
-        let insight = "";
-        const skills = applicant.skills || [];
-        const experience = applicant.experience || 0;
-        const education = applicant.education || "";
-        
-        // Personality traits mapped from skills and experience
-        const personalityTraits: Record<string, string> = {
-          "UI/UX Design": "human-centered thinker",
-          "Design Systems": "systematic problem solver",
-          "Visual Design": "visual storyteller",
-          "UX Research": "empathetic listener",
-          "Interaction Design": "intuitive experience creator",
-          "Prototype": "iterative innovator",
-          "Web Design": "digital craftsperson",
-          "Figma": "collaborative designer",
-          "Sketch": "detail-oriented visualizer",
-          "Product Design": "user advocate",
-          "JavaScript": "logical thinker",
-          "HTML": "structure-focused builder",
-          "CSS": "aesthetic implementer",
-          "React": "component-minded creator",
-          "User Testing": "feedback-driven improver",
-          "Design Thinking": "creative problem solver",
-          "Wireframing": "conceptual architect"
-        };
-        
-        // Choose a trait based on skills or randomly select one general trait if no match
-        let trait = "";
-        if (skills.length > 0) {
-          for (const skill of skills) {
-            if (skill && personalityTraits[skill]) {
-              trait = personalityTraits[skill];
-              break;
-            }
-          }
-        }
-        
-        if (!trait) {
-          // Default traits based on years of experience
-          if (experience > 10) {
-            trait = "seasoned industry veteran";
-          } else if (experience > 5) {
-            trait = "accomplished practitioner";
-          } else {
-            trait = "fresh perspective bringer";
-          }
-        }
-        
-        // Educational background as a modifier
-        let educationInsight = "";
-        if (education) {
-          if (education.includes("Computer Science") || education.includes("Software")) {
-            educationInsight = "technical foundation";
-          } else if (education.includes("Design") || education.includes("Art")) {
-            educationInsight = "creative background";
-          } else if (education.includes("Business") || education.includes("MBA")) {
-            educationInsight = "business-minded approach";
-          } else if (education.includes("Psychology") || education.includes("Cognitive")) {
-            educationInsight = "psychological understanding";
-          }
-        }
-        
-        // Create a very short, concise insight (no truncation)
-        if (educationInsight) {
-          insight = `${trait.charAt(0).toUpperCase() + trait.slice(1)} with ${educationInsight} background.`;
-        } else if (experience > 0) {
-          insight = `${trait.charAt(0).toUpperCase() + trait.slice(1)} with ${experience} years in the field.`;
-        } else {
-          insight = `${trait.charAt(0).toUpperCase() + trait.slice(1)} with fresh perspective.`;
-        }
-        
-        return (
-          <div className="max-w-md">
-            <div className="text-sm text-neutral-900">{insight}</div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "matchScore",
-      header: "Match Score",
-      cell: ({ row }) => {
-        const score = row.original.matchScore || 0;
-        let bgColor = "bg-red-100 text-red-800";
-        if (score >= 95) bgColor = "bg-green-100 text-green-800";
-        else if (score >= 51) bgColor = "bg-yellow-100 text-yellow-800";
-        
-        return (
-          <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${bgColor}`}>
-            {score}%
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status;
-        let statusColor = "";
-        
-        switch (status) {
-          case "new":
-            statusColor = "bg-neutral-100 text-neutral-800";
-            break;
-          case "shortlisted":
-            statusColor = "bg-blue-100 text-blue-800";
-            break;
-          case "approved":
-            statusColor = "bg-green-100 text-green-800";
-            break;
-          case "rejected":
-            statusColor = "bg-red-100 text-red-800";
-            break;
-          default:
-            statusColor = "bg-neutral-100 text-neutral-800";
-        }
-        
-        return (
-          <Badge className={`${statusColor} capitalize`}>
-            {status}
-          </Badge>
-        );
-      },
-    },
-    {
-      accessorKey: "recommendation",
-      header: "Why Recommended",
-      cell: ({ row }) => {
-        const applicant = row.original;
-        
-        // Generate a recommendation reason based on applicant data
-        const skills = applicant.skills || [];
-        const matchScore = applicant.matchScore || 0;
-        
-        let recommendation = "";
-        if (matchScore > 95) {
-          recommendation = "Perfect fit for required skills and experience level.";
-        } else if (matchScore > 85) {
-          recommendation = "Strong technical profile with relevant project experience.";
-        } else if (matchScore > 75) {
-          recommendation = "Solid skill foundation with transferable knowledge.";
-        } else if (matchScore > 65) {
-          recommendation = "Has core requirements with growth potential.";
-        } else {
-          recommendation = "Shows adjacent skills that could apply to this role.";
-        }
-        
-        // Add source information if available (LinkedIn, Indeed, etc.)
-        const source = applicant.source || "Direct";
-        
-        return (
-          <div className="max-w-xs">
-            <div className="text-sm text-neutral-700">{recommendation}</div>
-            <div className="text-xs text-neutral-500 mt-1">Source: {source}</div>
-          </div>
-        );
-      }
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        const applicant = row.original;
-        
-        return (
-          <div className="flex items-center justify-end space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-primary-600 hover:text-primary-900"
-              onClick={() => setLocation(`/compare?candidates=${applicant.id}`)}
-            >
-              <ArrowLeftRight className="mr-2 h-4 w-4" />
-              Compare
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary-600 hover:text-primary-900"
-              onClick={() => setLocation(`/applicants/${applicant.id}`)}
-            >
-              View
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setLocation(`/applicants/${applicant.id}`)}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation(`/applicants/${applicant.id}/notes`)}>
-                  <FilePlus className="mr-2 h-4 w-4" />
-                  Add note
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {applicant.status !== "shortlisted" && (
-                  <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, "shortlisted")}>
-                    <Check className="mr-2 h-4 w-4" />
-                    Shortlist
-                  </DropdownMenuItem>
-                )}
-                {applicant.status !== "approved" && (
-                  <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, "approved")}>
-                    <Check className="mr-2 h-4 w-4 text-green-600" />
-                    Approve
-                  </DropdownMenuItem>
-                )}
-                {applicant.status !== "rejected" && (
-                  <DropdownMenuItem onClick={() => handleStatusChange(applicant.id, "rejected")}>
-                    <X className="mr-2 h-4 w-4 text-red-600" />
-                    Reject
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
-    },
-  ];
-
-  if (isLoading) {
-    return <div>Loading applicants...</div>;
-  }
 
   // Count applicants in each category
   const greatFitCount = filterApplicantsByMatchCategory("great-fit").length;
@@ -378,135 +79,237 @@ export default function ApplicantsTable({ jobId, status }: ApplicantsTableProps)
   const notGoodFitCount = filterApplicantsByMatchCategory("not-good-fit").length;
   
   const filteredApplicants = filterApplicantsByMatchCategory(activeMatchTab);
-
-  // Count applicants by status
-  const newCount = applicants.filter(a => a.status === 'new').length;
-  const shortlistedCount = applicants.filter(a => a.status === 'shortlisted').length;
-  const approvedCount = applicants.filter(a => a.status === 'approved').length;
-  const rejectedCount = applicants.filter(a => a.status === 'rejected').length;
   
-  // Apply status filter if selected
-  let displayedApplicants = filteredApplicants;
-  if (activeStatusFilter) {
-    displayedApplicants = displayedApplicants.filter(a => a.status === activeStatusFilter);
+  // Apply text search filter if entered
+  const displayedApplicants = filteredApplicants.filter(applicant => {
+    if (!filterText) return true;
+    
+    const searchText = filterText.toLowerCase();
+    const name = applicant.name?.toLowerCase() || "";
+    const email = applicant.email?.toLowerCase() || "";
+    const skills = applicant.skills?.join(" ").toLowerCase() || "";
+    
+    return name.includes(searchText) || 
+           email.includes(searchText) || 
+           skills.includes(searchText);
+  });
+
+  if (isLoading) {
+    return <div>Loading applicants...</div>;
   }
   
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
-          <Button 
-            size="sm" 
-            variant={activeStatusFilter === null ? "default" : "outline"}
-            onClick={() => setActiveStatusFilter(null)}
-          >
-            All
-          </Button>
-          <Button 
-            size="sm" 
-            variant={activeStatusFilter === 'new' ? "default" : "outline"}
-            onClick={() => setActiveStatusFilter('new')}
-            className="bg-neutral-100 text-neutral-800 hover:bg-neutral-200 hover:text-neutral-900 border-neutral-200"
-          >
-            New ({newCount})
-          </Button>
-          <Button 
-            size="sm" 
-            variant={activeStatusFilter === 'shortlisted' ? "default" : "outline"}
-            onClick={() => setActiveStatusFilter('shortlisted')}
-            className="bg-blue-100 text-blue-800 hover:bg-blue-200 hover:text-blue-900 border-blue-200"
-          >
-            Shortlisted ({shortlistedCount})
-          </Button>
-          <Button 
-            size="sm" 
-            variant={activeStatusFilter === 'approved' ? "default" : "outline"}
-            onClick={() => setActiveStatusFilter('approved')}
-            className="bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 border-green-200"
-          >
-            Approved ({approvedCount})
-          </Button>
-          <Button 
-            size="sm" 
-            variant={activeStatusFilter === 'rejected' ? "default" : "outline"}
-            onClick={() => setActiveStatusFilter('rejected')}
-            className="bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 border-red-200"
-          >
-            Rejected ({rejectedCount})
-          </Button>
+      <div className="flex justify-between items-center mb-4">
+        <div className="relative w-full max-w-md">
+          <Input
+            placeholder="Search by name, skill, or keyword"
+            className="pl-3 pr-10 py-2 border-gray-300 rounded-md"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+          />
         </div>
         
         <div className="flex space-x-2">
           <Button 
-            size="sm" 
             variant="outline" 
-            className="ml-auto"
-            onClick={() => {/* Would handle CSV export */}}
+            size="sm" 
+            className="bg-white border-gray-300 text-gray-700"
           >
-            <Download className="h-4 w-4 mr-2" /> Export
+            Smart Sorting <span className="ml-1">↓</span>
           </Button>
           
-          {selectedRows.length > 0 && (
-            <>
-              <Button size="sm" variant="outline" onClick={() => {
-                selectedRows.forEach(id => handleStatusChange(id, 'shortlisted'));
-                setSelectedRows([]);
-              }}>
-                <Check className="mr-2 h-4 w-4" />
-                Shortlist Selected
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => {
-                selectedRows.forEach(id => handleStatusChange(id, 'approved'));
-                setSelectedRows([]);
-              }}>
-                <Check className="mr-2 h-4 w-4 text-green-600" />
-                Approve Selected
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => {
-                selectedRows.forEach(id => handleStatusChange(id, 'rejected'));
-                setSelectedRows([]);
-              }}>
-                <X className="mr-2 h-4 w-4 text-red-600" />
-                Reject Selected
-              </Button>
-            </>
-          )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-gray-900 text-white hover:bg-gray-800"
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" /> Filters
+          </Button>
         </div>
       </div>
       
-      <Card className="shadow-sm">
-        <Tabs value={activeMatchTab} onValueChange={setActiveMatchTab} className="w-full">
-          <TabsList className="grid grid-cols-4 w-full rounded-b-none">
-            <TabsTrigger value="all" className="text-sm">
-              All Applicants ({applicants.length})
-            </TabsTrigger>
-            <TabsTrigger value="great-fit" className="text-sm bg-green-50 data-[state=active]:bg-green-100 data-[state=active]:text-green-900">
-              Great Fit ({greatFitCount})
-            </TabsTrigger>
-            <TabsTrigger value="good-fit" className="text-sm bg-yellow-50 data-[state=active]:bg-yellow-100 data-[state=active]:text-yellow-900">
-              Good Fit ({goodFitCount})
-            </TabsTrigger>
-            <TabsTrigger value="not-good-fit" className="text-sm bg-red-50 data-[state=active]:bg-red-100 data-[state=active]:text-red-900">
-              Not a Good Fit ({notGoodFitCount})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value={activeMatchTab} className="m-0 p-0">
-            <DataTable
-              columns={columns}
-              data={displayedApplicants}
-              filterColumn="name"
-              filterPlaceholder="Search by name or skill..."
-              onRowSelectionChange={(rows: Record<string, boolean>) => {
-                setSelectedRows(
-                  Object.keys(rows)
-                    .filter(key => rows[key])
-                    .map(key => parseInt(key, 10))
+      <Card className="shadow-sm border-0 overflow-hidden rounded-lg">
+        <div className="flex w-full rounded-t-lg overflow-hidden">
+          <div 
+            className={`px-6 py-3 flex-1 text-center font-medium border-r border-gray-300 cursor-pointer ${activeMatchTab === 'all' ? 'bg-neutral-300' : 'bg-neutral-200'}`}
+            onClick={() => setActiveMatchTab("all")}
+          >
+            All Applicants ({applicants.length})
+          </div>
+          <div 
+            className={`px-6 py-3 flex-1 text-center font-medium border-r border-gray-300 cursor-pointer ${activeMatchTab === 'great-fit' ? 'bg-green-200' : 'bg-green-100'}`}
+            onClick={() => setActiveMatchTab("great-fit")}
+          >
+            Great Fit ({greatFitCount})
+          </div>
+          <div 
+            className={`px-6 py-3 flex-1 text-center font-medium border-r border-gray-300 cursor-pointer ${activeMatchTab === 'good-fit' ? 'bg-yellow-200' : 'bg-yellow-100'}`}
+            onClick={() => setActiveMatchTab("good-fit")}
+          >
+            Good Fit ({goodFitCount})
+          </div>
+          <div 
+            className={`px-6 py-3 flex-1 text-center font-medium cursor-pointer ${activeMatchTab === 'not-good-fit' ? 'bg-red-200' : 'bg-red-100'}`}
+            onClick={() => setActiveMatchTab("not-good-fit")}
+          >
+            Not a Fit ({notGoodFitCount})
+          </div>
+        </div>
+        
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="px-4 py-3 text-left w-8">
+                <Checkbox
+                  checked={displayedApplicants.length > 0 && selectedRows.length === displayedApplicants.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedRows(displayedApplicants.map(a => a.id));
+                    } else {
+                      setSelectedRows([]);
+                    }
+                  }}
+                  aria-label="Select all"
+                />
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700">Name & Title</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700">Key Skills</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700">Personal Insight</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700">Match</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700">Status</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {displayedApplicants.map((applicant) => {
+              // Get or generate insight based on skills and background
+              let insight = "Systematic problem solver with psych and tech background.";
+              
+              // Status badge color
+              let statusBadge = (
+                <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 rounded-full px-3 py-1 font-medium">
+                  New
+                </Badge>
+              );
+              
+              if (applicant.status === "shortlisted") {
+                statusBadge = (
+                  <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 rounded-full px-3 py-1 font-medium">
+                    Shortlisted
+                  </Badge>
                 );
-              }}
-            />
-          </TabsContent>
-        </Tabs>
+              } else if (applicant.status === "approved") {
+                statusBadge = (
+                  <Badge className="bg-green-100 text-green-800 hover:bg-green-200 rounded-full px-3 py-1 font-medium">
+                    Approved
+                  </Badge>
+                );
+              } else if (applicant.status === "rejected") {
+                statusBadge = (
+                  <Badge className="bg-red-100 text-red-800 hover:bg-red-200 rounded-full px-3 py-1 font-medium">
+                    Rejected
+                  </Badge>
+                );
+              }
+              
+              // Match score
+              const score = applicant.matchScore || 0;
+              let scoreColor = "bg-red-100 text-red-800";
+              if (score >= 95) scoreColor = "bg-green-100 text-green-800";
+              else if (score >= 85) scoreColor = "bg-green-100 text-green-800";
+              else if (score >= 70) scoreColor = "bg-yellow-100 text-yellow-800";
+              
+              return (
+                <tr key={applicant.id} className="border-b border-gray-200 hover:bg-gray-50">
+                  <td className="px-4 py-4">
+                    <Checkbox
+                      checked={selectedRows.includes(applicant.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedRows([...selectedRows, applicant.id]);
+                        } else {
+                          setSelectedRows(selectedRows.filter(id => id !== applicant.id));
+                        }
+                      }}
+                      aria-label={`Select ${applicant.name}`}
+                    />
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="font-medium text-gray-900">{applicant.name}</div>
+                    <div className="text-sm text-gray-500">Product Engineer</div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col gap-1">
+                      {(applicant.skills || []).slice(0, 3).map((skill, i) => (
+                        <Badge key={i} variant="outline" className="bg-gray-100 text-gray-800 border-0 hover:bg-gray-200 justify-start w-fit whitespace-nowrap">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 max-w-xs">
+                    <p className="text-sm text-gray-700 line-clamp-2">{insight}</p>
+                  </td>
+                  <td className="px-4 py-4">
+                    <Badge className={`${scoreColor} rounded-full px-3 py-1`}>
+                      {score}%
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-4">
+                    {statusBadge}
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-0 h-auto bg-transparent hover:bg-transparent"
+                        onClick={() => handleStatusChange(applicant.id, "approved")}
+                      >
+                        <Check className="h-5 w-5 text-green-600 hover:text-green-800" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-0 h-auto bg-transparent hover:bg-transparent"
+                        onClick={() => viewApplicant(applicant.id)}
+                      >
+                        <Eye className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-0 h-auto bg-transparent hover:bg-transparent"
+                        onClick={() => handleStatusChange(applicant.id, "rejected")}
+                      >
+                        <X className="h-5 w-5 text-red-600 hover:text-red-800" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        
+        <div className="flex justify-center space-x-1 p-4 bg-white border-t border-gray-200">
+          <Button variant="outline" size="sm" className="bg-white border-gray-300 text-gray-700">
+            &lt; Previous
+          </Button>
+          <Button variant="outline" size="sm" className="bg-white border-gray-300 text-gray-700">
+            1
+          </Button>
+          <Button variant="outline" size="sm" className="bg-white border-gray-300 text-gray-700">
+            2
+          </Button>
+          <Button variant="outline" size="sm" className="bg-white border-gray-300 text-gray-700">
+            3
+          </Button>
+          <Button variant="outline" size="sm" className="bg-white border-gray-300 text-gray-700">
+            Next &gt;
+          </Button>
+        </div>
       </Card>
     </div>
   );
