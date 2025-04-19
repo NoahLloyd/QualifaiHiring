@@ -158,7 +158,7 @@ export default function Dashboard() {
         </div>
         
         <div>
-          <div className="flex justify-between mb-1">
+          <div className="flex justify-between mb-4">
             <h3 className="font-medium flex items-center">
               <Clock className="h-4 w-4 mr-2 text-green-600" />
               Reviews this week
@@ -169,8 +169,8 @@ export default function Dashboard() {
           </div>
           
           <div className="mb-6">
-            <Progress value={mockReviewPercent} className="h-2 bg-gray-200" indicatorClassName="bg-green-600" />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <Progress value={mockReviewPercent} className="h-2 bg-gray-200 mb-2" indicatorClassName="bg-green-600" />
+            <div className="flex justify-between text-xs text-gray-500">
               <span>Goal: 15 reviews/day - Almost there!</span>
               <span>{mockReviewPercent}%</span>
             </div>
