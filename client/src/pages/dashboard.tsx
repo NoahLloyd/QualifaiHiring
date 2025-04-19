@@ -169,11 +169,11 @@ export default function Dashboard() {
           </div>
           
           <div className="mb-6">
-            <div className="flex justify-between text-sm mb-1">
+            <Progress value={mockReviewPercent} className="h-2 bg-gray-200" indicatorClassName="bg-green-600" />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>Goal: 15 reviews/day - Almost there!</span>
               <span>{mockReviewPercent}%</span>
             </div>
-            <Progress value={mockReviewPercent} className="h-2 bg-gray-200" indicatorClassName="bg-green-600" />
           </div>
           
           <h3 className="font-medium mb-4">Workload Distribution</h3>
@@ -182,7 +182,7 @@ export default function Dashboard() {
             {mockTeamMembers.map(member => (
               <div key={member.id} className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-medium text-sm mr-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-medium text-sm mr-3">
                     {member.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div>
@@ -190,7 +190,7 @@ export default function Dashboard() {
                     <div className="text-sm text-gray-500">{member.role}</div>
                   </div>
                 </div>
-                <div className="text-sm">
+                <div className="px-3 py-1 rounded-full bg-gray-100 text-sm">
                   {member.applicantsHandling} Applicants
                 </div>
               </div>
