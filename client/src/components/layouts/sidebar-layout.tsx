@@ -26,22 +26,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation */}
         <header className="bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center justify-end h-16 px-6">
             <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="mr-4 md:hidden"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                <Menu className="h-6 w-6" />
-              </Button>
-              <h1 className="text-lg font-semibold text-gray-800">
-                Snapchat Qualifai
-              </h1>
+              <span className="text-sm font-medium mr-2">Welcome back, Katy!</span>
+              <UserNav />
             </div>
-
-            <UserNav />
           </div>
         </header>
 
